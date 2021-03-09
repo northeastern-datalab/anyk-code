@@ -1,0 +1,39 @@
+# Plot Files #
+###################
+*.png
+*.pdf
+*.svg
+
+# Raw input and output Files #
+###################
+*.in
+*.out
+
+# Graph input files #
+###################
+*.csv
+*.tsv
+
+# Compiled source #
+###################
+*.pyc
+
+target/
+
+# Eclipse etc.#
+###################
+.classpath
+.project
+.settings/
+.idea
+
+# Maven #
+###################
+dependency-reduced-pom.xml
+
+# Other #
+###################
+org.eclipse.*
+launch.json
+settings.json
+send_code.sh
