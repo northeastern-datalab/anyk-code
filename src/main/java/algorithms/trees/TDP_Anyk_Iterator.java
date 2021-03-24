@@ -1,23 +1,7 @@
 package algorithms.trees;
 
-import java.util.List;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
-import data.Database_Query_Generator;
-import data.Star_RandomPattern;
-import entities.Relation;
-import entities.trees.Star_Equijoin_Query;
 import entities.trees.TDP_Problem_Instance;
 import entities.trees.TDP_Solution;
-import entities.trees.TDP_Star_Equijoin_Instance;
-import util.DatabaseParser;
 
 /** 
  * A ranked enumeration algorithm for a T-DP problem specified by a {@link entities.trees.TDP_Problem_Instance} object.
