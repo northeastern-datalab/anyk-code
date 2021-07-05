@@ -11,7 +11,7 @@
 
 # SQL Scripts #
 ###################
-#*.sql
+*.sql
 
 # Graph input files #
 ###################
