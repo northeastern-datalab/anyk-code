@@ -1,17 +1,16 @@
 #!/bin/bash
 
-source ../../execution_parameters.sh
+source ../execution_parameters.sh
 JAR_PATH="../../../target/any-k-1.0.jar"
 DATA_PATH="inputs/"
 OUT_PATH="outputs/"
 OPTS=$MEM
 
-iters=200
 ALG_LIST=("Batch" "BatchSorting" "Eager" "All" "Take2" "Lazy" "Recursive")
 
 
 l=4
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_STARS_ALL);
 do
 		for n in 10000
 		do
@@ -33,7 +32,7 @@ do
 done
 
 l=6
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_STARS_ALL);
 do
 		for n in 100
 		do
@@ -55,7 +54,7 @@ do
 done
 
 l=3
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_STARS_ALL);
 do
 		for n in 100000
 		do

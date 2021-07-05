@@ -1,17 +1,16 @@
 #!/bin/bash
 
-source ../../execution_parameters.sh
+source ../execution_parameters.sh
 JAR_PATH="../../../target/any-k-1.0.jar"
 DATA_PATH="inputs/"
 OUT_PATH="outputs/"
 OPTS=$MEM
 
-iters=400
 graph=bitcoinotc
 ALG_LIST=("Eager" "All" "Take2" "Lazy" "Recursive") 
 
 
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_BITCOIN_STAR);
 do
 	for l in 3 4 6
 	do

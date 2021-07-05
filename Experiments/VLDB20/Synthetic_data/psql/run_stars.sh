@@ -1,8 +1,7 @@
 #!/bin/bash
 
+source ../../execution_parameters.sh
 JAR_PATH="../../../../target/any-k-1.0.jar"
-#iters=200
-iters=3
 
 ## 3-Star
 n=100000
@@ -10,7 +9,7 @@ l=3
 d=$((n / 10))
 ## Generate csv files
 ./generate_sql_star.py `pwd`/inputs/ $l
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_PSQL_STARS);
 do
     # Create the input if it doesn't exist
     INPUT="../inputs/star_n${n}_l${l}_d${d}_i${i}.in"
@@ -35,7 +34,7 @@ l=4
 d=$((n / 10))
 ## Generate csv files
 ./generate_sql_star.py `pwd`/inputs/ $l
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_PSQL_STARS);
 do
     # Create the input if it doesn't exist
     INPUT="../inputs/star_n${n}_l${l}_d${d}_i${i}.in"
@@ -60,7 +59,7 @@ l=6
 d=$((n / 10))
 ## Generate csv files
 ./generate_sql_star.py `pwd`/inputs/ $l
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_PSQL_STARS);
 do
     # Create the input if it doesn't exist
     INPUT="../inputs/star_n${n}_l${l}_d${d}_i${i}.in"

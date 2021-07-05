@@ -1,17 +1,16 @@
 #!/bin/bash
 
-source ../../execution_parameters.sh
+source ../execution_parameters.sh
 JAR_PATH="../../../target/any-k-1.0.jar"
 DATA_PATH="inputs/"
 OUT_PATH="outputs/"
 OPTS=$MEM
 
-iters=200
 ALG_LIST=("NPRR_Sort" "NPRR" "Eager" "All" "Take2" "Lazy" "Recursive") 
 
 
 l=4
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_CYCLES_ALL);
 do
 	n=5000
 	# Create the input if it doesn't exist
@@ -28,7 +27,7 @@ do
 done
 
 l=6
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_CYCLES_ALL);
 do
 	n=400
 	# Create the input if it doesn't exist

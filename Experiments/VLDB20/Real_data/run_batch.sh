@@ -1,6 +1,6 @@
 #/bin/bash
 
-source ../../execution_parameters.sh
+source ../execution_parameters.sh
 JAR_PATH="../../../target/any-k-1.0.jar"
 DATA_PATH="inputs/"
 OUT_PATH="outputs/"

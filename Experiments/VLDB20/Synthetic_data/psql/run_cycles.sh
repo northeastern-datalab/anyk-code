@@ -1,15 +1,14 @@
 #!/bin/bash
 
+source ../../execution_parameters.sh
 JAR_PATH="../../../../target/any-k-1.0.jar"
-#iters=200
-iters=3
 
 ## 4-CYCLE
 n=5000
 l=4
 ## Generate sql file
 ./generate_sql_cycle.py `pwd`/inputs/ $l
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_PSQL_CYCLES);
 do
 	# Create the input if it doesn't exist
 	INPUT="../inputs/cycle_n${n}_l${l}_i${i}.in"
@@ -33,7 +32,7 @@ n=400
 l=6
 ## Generate sql file
 ./generate_sql_cycle.py `pwd`/inputs/ $l
-for i in $(seq 1 $iters);
+for i in $(seq 1 $ITERS_PSQL_CYCLES);
 do
 	# Create the input if it doesn't exist
 	INPUT="../inputs/cycle_n${n}_l${l}_i${i}.in"

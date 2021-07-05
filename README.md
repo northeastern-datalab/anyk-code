@@ -63,7 +63,7 @@ java -cp target/any-k-1.0.jar entities.paths.DP_Path_Equijoin_Instance
 
 
 ## Reproducibility of Experiments
-[Experiments/VLDB2020/README.md](https://github.com/northeastern-datalab/any-k-code/tree/master/Experiments/VLDB2020/README.md) contains a detailed description of how to reproduce the experimental results reported in the VLDB 2020 paper.
+[Experiments/VLDB2020/README.md](https://github.com/northeastern-datalab/any-k-code/tree/master/Experiments/VLDB20/README.md) contains a detailed description of how to reproduce the experimental results reported in the VLDB 2020 paper.
 
 
 ## License

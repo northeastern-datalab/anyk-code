@@ -9,10 +9,18 @@
 *.in
 *.out
 
+# SQL Scripts #
+###################
+*.sql
+
 # Graph input files #
 ###################
 *.csv
 *.tsv
+
+# Database input files #
+###################
+*.tbl
 
 # Compiled source #
 ###################

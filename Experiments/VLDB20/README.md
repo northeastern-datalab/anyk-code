@@ -58,18 +58,11 @@ Experiments were run on a PowerEdge R720 machine with the following specs:
 - *Processor*: 2x Intel(R) Xeon(R) CPU E5-2643 0 @3.30GHz
 - *Memory*: 128GB DDR-3 1600MHz (8x16) 
 
-To run in a machine with less RAM, you can tweak `../execution_parameters.sh` to reduce the size of the allocated VM memory. However, doing so might give out-of-memory errors or different timing measurements because of garbage collection.
+To run in a machine with less RAM, you can tweak `execution_parameters.sh` to reduce the size of the allocated VM memory. However, doing so might give out-of-memory errors or different timing measurements because of garbage collection.
 
 
 
-### Repeating the Experiments
-Directories `Synthetic_data` and `Real_data` contain `run_*` bash scripts that produce the synthetic data, run the experiments, and store the timing measurements in an `outputs/` directory. For the real datasets, you first need to execute `Real_data/create_input.sh` that preprocesses the data in a format readable by the program. Each directory also contains a `do_plots.sh` script that generates the figures of the paper in the `plots/` directoru.
-
-All that is automated by simply running `run_and_plot.sh` in the current directory.
-
-
-
-### PostgreSQL experiments
+### PostgreSQL configuration
 To reproduce the experiments on PostgreSQL, you first need a working version of the system. The version that has been tested is 9.5.20.
 First, create a psql role and database matching your operating system user name ($USER).
 Then, edit your postgresql.conf file (`psql -U $USER -c 'SHOW config_file'` to find its location) with the following parameters:
@@ -91,3 +84,10 @@ SELECT pg_reload_conf();
 
 To run the experiments, navigate to `Synthetic_data/psql` and use the `run_*` scripts (`run_and_plot.sh` will also execute those). To get the median timings, you can use `Synthetic_data/psql/report_median.py`.
 
+
+### Repeating the Experiments
+Directories `Synthetic_data` and `Real_data` contain `run_*` bash scripts that produce the synthetic data, run the experiments, and store the timing measurements in an `outputs/` directory. For the real datasets, you first need to execute `Real_data/create_input.sh` that preprocesses the data in a format readable by the program. Each directory also contains a `do_plots.sh` script that generates the figures of the paper in the `plots/` directory.
+
+All that is automated by simply running `run_and_plot.sh` in the current directory.
+
+Running all the iterations required to minimize the variance and obtain the same figures as in the paper will take many days. To get some quick results, fewer iterations can be run by appropriately modifying `execution_parameters.sh`.
