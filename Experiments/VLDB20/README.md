@@ -47,9 +47,9 @@ java -cp target/any-k-1.0.jar entities.paths.DP_Path_Equijoin_Instance
 The produced jar contains the generators for the synthetic data experiments in the `data/` package. 
 
 **Real datasets Repository**: 
-The `Real_data/` experiments assume the .csv files to be in the corresponding `Real_data/inputs/` directory. Running `Real_data/inputs/create_input.sh` will download and preprocess them automatically.
-* Twitter: Unfortunately the dataset is not available at http://socialcomputing.asu.edu anymore. We are working towards a solution to host it somewhere else. If you have the dataset, rename the .csv file to `twitter.csv` and place it in `Real_data/inputs/`.
-* BitcoinOTC: Available at https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html.
+The `Real_data/` experiments assume the .csv files to be in the corresponding `Real_data/inputs/` directory. Running `Real_data/inputs/create_input.sh` will download and preprocess them.
+* Twitter: Available [here](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html)
+* BitcoinOTC: Available [here](http://datasets.syr.edu/datasets/Twitter.html)
 
 
 
