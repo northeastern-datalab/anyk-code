@@ -11,7 +11,7 @@
 
 # SQL Scripts #
 ###################
-*.sql
+#*.sql
 
 # Graph input files #
 ###################
@@ -38,6 +38,11 @@ target/
 # Maven #
 ###################
 dependency-reduced-pom.xml
+
+# Compressed files #
+###################
+*.zip
+*.gz
 
 # Other #
 ###################
