@@ -180,10 +180,10 @@ if (n == 5000 and l == 4):
 if (n == 2000 and l == 6):
 	plt.xlim(1.2, 2.1)
 
-if ("Cycle" in title and l == 4 and n == 100000):
-	plt.xlim(1.12, 1.4)
-if ("Cycle" in title and l == 6 and n == 100000):
-	plt.xlim(2.3, 3.0)
+if ("Cycle" in title and n == 100000 and (l == 4 or l == 6)):
+	plt.xlim(None, times["Eager"][-1] * 1.1)
+#plt.xlim(1.12, 1.4)
+#plt.xlim(2.3, 3.0)
 
 ax.set(xlabel="Time (sec)", ylabel="#Results")
 #plt.legend()

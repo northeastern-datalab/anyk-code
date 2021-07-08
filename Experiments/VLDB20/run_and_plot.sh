@@ -1,21 +1,21 @@
 #!/bin/bash
 
-## Any-k Synthetic
+## Synthetic Data
 
-cd Synthetic_data/
+#cd Synthetic_data/
+#
+#./run_paths_all.sh
+#./run_paths_few.sh
+#./run_stars_all.sh
+#./run_stars_few.sh
+#./run_cycles_all.sh
+#./run_cycles_few.sh
+#
+#./do_plots.sh
+#
+#cd ../
 
-./run_paths_all.sh
-./run_paths_few.sh
-./run_stars_all.sh
-./run_stars_few.sh
-./run_cycles_all.sh
-./run_cycles_few.sh
-
-./do_plots.sh
-
-cd ../
-
-## Any-k Real
+## Real Data
 
 cd Real_data/
 
@@ -34,7 +34,7 @@ cd ../
 
 cd ../
 
-## PostgreSQL
+## PostgreSQL on Synthetic Data
 
 cd Synthetic_data/psql/
 

@@ -62,8 +62,6 @@ alphas=[1, 1, 0.9, 1, 1, 1, 1]
 lns = []
 times = {}	# times[alg] contains a list of runtimes (one for each k)
 
-#print title
-
 for i in range(len(algorithms)):
 	alg = algorithms[i]
 
@@ -124,19 +122,11 @@ ax.grid()
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 if ("Twitter" in title and "Star" in title and l == 4):
-	plt.xlim(4, 9)
-if ("Bitcoin" in title and "Path" in title and l == 4):
-	plt.xlim(0.11, 0.3)
+	plt.gca().set_xlim(right=times["Eager"][-1] * 1.2)
 if ("Twitter" in title and "Cycle" in title and l == 6):
-	plt.gca().set_xlim(right=110)
+	plt.gca().set_xlim(right=times["Eager"][-1] * 1.05)
 if ("Twitter" in title and "Star" in title and l == 6):
-	plt.xlim(6, 11)
-	
-'''
-
-if ("Twitter" in title and "Cycle" in title and l == 6):
-	plt.xlim(99, 118)
-'''
+	plt.gca().set_xlim(right=times["Eager"][-1] * 1.2)
 
 ax.set(xlabel="Time (sec)", ylabel="#Results")
 #plt.legend()
