@@ -2,18 +2,18 @@
 
 ## Synthetic Data
 
-#cd Synthetic_data/
-#
-#./run_paths_all.sh
-#./run_paths_few.sh
-#./run_stars_all.sh
-#./run_stars_few.sh
-#./run_cycles_all.sh
-#./run_cycles_few.sh
-#
-#./do_plots.sh
-#
-#cd ../
+cd Synthetic_data/
+
+./run_paths_all.sh
+./run_paths_few.sh
+./run_stars_all.sh
+./run_stars_few.sh
+./run_cycles_all.sh
+./run_cycles_few.sh
+
+./do_plots.sh
+
+cd ../
 
 ## Real Data
 
