@@ -176,14 +176,10 @@ if (n == 5000 and l == 4):
 	ax.annotate(('%.1f' % batch_last),xy = (batch_last, last_k), size=15, color = cmap(5))
 	ax.annotate(('%.1f' % batch_first),xy = (batch_first, first_k), size=15, color = cmap(5))
 	ax.annotate(('%.1f' % rea_last),xy = (rea_last, last_k), size=15, color = cmap(0), textcoords="offset points", xytext=(-25,0))
-
-if (n == 2000 and l == 6):
-	plt.xlim(1.2, 2.1)
+	
 
 if ("Cycle" in title and n == 100000 and (l == 4 or l == 6)):
-	plt.xlim(None, times["Eager"][-1] * 1.1)
-#plt.xlim(1.12, 1.4)
-#plt.xlim(2.3, 3.0)
+	plt.xlim(left=0.9 * min([times[alg][0] for alg in algorithms]), right = times["Eager"][-1] * 1.1)
 
 ax.set(xlabel="Time (sec)", ylabel="#Results")
 #plt.legend()

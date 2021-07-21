@@ -122,11 +122,11 @@ ax.grid()
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 if ("Twitter" in title and "Star" in title and l == 4):
-	plt.gca().set_xlim(right=times["Eager"][-1] * 1.2)
+	plt.xlim(left=0.9 * min([times[alg][0] for alg in algorithms]), right=times["Eager"][-1] * 1.2)
 if ("Twitter" in title and "Cycle" in title and l == 6):
-	plt.gca().set_xlim(right=times["Eager"][-1] * 1.05)
+	plt.xlim(left=0.9 * min([times[alg][0] for alg in algorithms]), right=times["Eager"][-1] * 1.05)
 if ("Twitter" in title and "Star" in title and l == 6):
-	plt.gca().set_xlim(right=times["Eager"][-1] * 1.2)
+	plt.xlim(left=0.9 * min([times[alg][0] for alg in algorithms]), right=times["Eager"][-1] * 1.2)
 
 ax.set(xlabel="Time (sec)", ylabel="#Results")
 #plt.legend()

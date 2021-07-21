@@ -44,6 +44,10 @@ dependency-reduced-pom.xml
 *.zip
 *.gz
 
+# Various log files #
+###################
+*.log
+
 # Other #
 ###################
 org.eclipse.*
