@@ -79,7 +79,12 @@ for i in range(len(algorithms)):
 		max_k = 0
 
 		# Read file
-		fp1 = open(inFileName + "_" + alg + ".out")
+		try:
+			fp1 = open(inFileName + "_" + alg + ".out")
+		except IOError:
+			println("Could not open file for " + title)
+			sys.exit(1)
+
 		line = fp1.readline()
 		while line:
 
@@ -99,6 +104,11 @@ for i in range(len(algorithms)):
 
 			line = fp1.readline()
 		fp1.close()
+
+		# If no data points were read, return an error
+		if not times_aux:
+			println("No data points to plot found for " + title)
+			sys.exit(1)
 
 		# If some instances contained more data points than others, cut them off
 		instances_no = len(times_aux[0])

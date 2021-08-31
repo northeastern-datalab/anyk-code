@@ -79,108 +79,111 @@ public class DP_Path_ThetaJoin_Instance extends DP_Problem_Instance
                 new_stage.add(new_node);
             }
 
-            // Analyze the type of join conditions between the two relations to decide
-            // how the join will be handled
-            List<Join_Predicate> conditions = path_query.join_conditions.get(relation_index);
-            int ineq_cnt = 0, neq_cnt = 0, band_cnt = 0;
-            for (Join_Predicate p : conditions)
-            {
-                if (p.type.equals("E"))
+            // The join condition between the two relations is given in DNF form
+            // To handle the disjunctions, construct a graph independently for each one
+            for (List<Join_Predicate> conjunction : path_query.join_conditions.get(relation_index))
                 {
-                    if (ineq_cnt != 0 || neq_cnt != 0 || band_cnt != 0)
+                // Analyze the type of conjunction between the two relations to decide
+                // how the join will be handled
+                int ineq_cnt = 0, neq_cnt = 0, band_cnt = 0;
+                for (Join_Predicate p : conjunction)
+                {
+                    if (p.type.equals("E"))
                     {
-                        System.err.println("Equality conditions must precede others!");
+                        if (ineq_cnt != 0 || neq_cnt != 0 || band_cnt != 0)
+                        {
+                            System.err.println("Equality conditions must precede others!");
+                            System.exit(1);
+                        }
+                    } 
+                    else if (p.type.equals("IL") || p.type.equals("IG")) ineq_cnt += 1;
+                    else if (p.type.equals("N")) neq_cnt += 1;
+                    else if (p.type.equals("B")) band_cnt += 1;
+                    else
+                    {
+                        System.err.println("Join condition currently unsupported!");
                         System.exit(1);
                     }
-                } 
-                else if (p.type.equals("IL") || p.type.equals("IG")) ineq_cnt += 1;
-                else if (p.type.equals("N")) neq_cnt += 1;
-                else if (p.type.equals("B")) band_cnt += 1;
+                }
+                // Encode the state-space of joining tuples between the relations efficiently
+                // according to the type of join conditions
+                if (ineq_cnt == 0 && neq_cnt == 0 && band_cnt == 0)
+                {
+                    // Only equalities here or no conditions at all which means cartesian product
+                    // Use the equality class
+                    Equality.factorize_equality(new_stage, prev_stage, conjunction);
+                }
+                else if (method == null)
+                {
+                    if (ineq_cnt == 1 && neq_cnt == 0 && band_cnt == 0)
+                    {
+                        // A single inequality condition and maybe some equalities
+                        // Use the multi-way partitioning class for lower memory consumption
+                        Multiway_Partitioning.factorize_inequality(new_stage, prev_stage, conjunction);
+                    }
+                    else if (ineq_cnt == 0 && neq_cnt == 1 && band_cnt == 0)
+                    {
+                        // A single non-equality condition and maybe some equalities
+                        // Use the multi-way partitioning class for lower memory consumption
+                        Multiway_Partitioning.factorize_nonequality(new_stage, prev_stage, conjunction);
+                    }
+                    else if (ineq_cnt == 0 && neq_cnt == 0 && band_cnt == 1)
+                    {
+                        // A single band condition and maybe some equalities
+                        // Use the multi-way partitioning class for lower memory consumption
+                        Multiway_Partitioning.factorize_band(new_stage, prev_stage, conjunction);
+                    }
+                    else
+                    {
+                        // A conjunction of inequalities, etc.
+                        // Use the binary partitioning class
+                        Binary_Partitioning.factorize_conjunction(new_stage, prev_stage, conjunction);
+                    }                
+                }
+                else if (method.equals("binary_part"))
+                {
+                    Binary_Partitioning.factorize_conjunction(new_stage, prev_stage, conjunction);
+                }
+                else if (method.equals("multi_part"))
+                {
+                    if (ineq_cnt == 1 && neq_cnt == 0 && band_cnt == 0)
+                    {
+                        Multiway_Partitioning.factorize_inequality(new_stage, prev_stage, conjunction);
+                    }
+                    else if (ineq_cnt == 0 && neq_cnt == 1 && band_cnt == 0)
+                    {
+                        Multiway_Partitioning.factorize_nonequality(new_stage, prev_stage, conjunction);
+                    }
+                    else if (ineq_cnt == 0 && neq_cnt == 0 && band_cnt == 1)
+                    {
+                        Multiway_Partitioning.factorize_band(new_stage, prev_stage, conjunction);
+                    }
+                    else
+                    {
+                        System.err.println("Multiway Partitioning is currently supported only for a single ineq/non-eq/band predicate");
+                        System.exit(1);
+                    }                
+                }
+                else if (method.equals("shared_ranges"))
+                {
+                    if (ineq_cnt == 1 && neq_cnt == 0 && band_cnt == 0)
+                    {
+                        // A single inequality condition and maybe some equalities
+                        Shared_Ranges.factorize_inequality(new_stage, prev_stage, conjunction);
+                        set_bottom_up_implementation("iterative");
+                    }                
+                    else
+                    {
+                        System.err.println("Shared ranges is currently supported only for a single inequality predicate");
+                        System.exit(1);                   
+                    }
+                }
                 else
                 {
-                    System.err.println("Join condition currently unsupported!");
-                    System.exit(1);
+                    System.err.println("Unrecognized method");
+                    System.exit(1);                            
                 }
             }
-            // Encode the state-space of joining tuples between the relations efficiently
-            // according to the type of join conditions
-            if (ineq_cnt == 0 && neq_cnt == 0 && band_cnt == 0)
-            {
-                // Only equalities here or no conditions at all which means cartesian product
-                // Use the equality class
-                Equality.factorize_equality(new_stage, prev_stage, conditions);
-            }
-            else if (method == null)
-            {
-                if (ineq_cnt == 1 && neq_cnt == 0 && band_cnt == 0)
-                {
-                    // A single inequality condition and maybe some equalities
-                    // Use the multi-way partitioning class for lower memory consumption
-                    Multiway_Partitioning.factorize_inequality(new_stage, prev_stage, conditions);
-                }
-                else if (ineq_cnt == 0 && neq_cnt == 1 && band_cnt == 0)
-                {
-                    // A single non-equality condition and maybe some equalities
-                    // Use the multi-way partitioning class for lower memory consumption
-                    Multiway_Partitioning.factorize_nonequality(new_stage, prev_stage, conditions);
-                }
-                else if (ineq_cnt == 0 && neq_cnt == 0 && band_cnt == 1)
-                {
-                    // A single band condition and maybe some equalities
-                    // Use the multi-way partitioning class for lower memory consumption
-                    Multiway_Partitioning.factorize_band(new_stage, prev_stage, conditions);
-                }
-                else
-                {
-                    // A conjunction of inequalities, etc.
-                    // Use the binary partitioning class
-                    Binary_Partitioning.factorize_conjunction(new_stage, prev_stage, conditions);
-                }                
-            }
-            else if (method.equals("binary_part"))
-            {
-                Binary_Partitioning.factorize_conjunction(new_stage, prev_stage, conditions);
-            }
-            else if (method.equals("multi_part"))
-            {
-                if (ineq_cnt == 1 && neq_cnt == 0 && band_cnt == 0)
-                {
-                    Multiway_Partitioning.factorize_inequality(new_stage, prev_stage, conditions);
-                }
-                else if (ineq_cnt == 0 && neq_cnt == 1 && band_cnt == 0)
-                {
-                    Multiway_Partitioning.factorize_nonequality(new_stage, prev_stage, conditions);
-                }
-                else if (ineq_cnt == 0 && neq_cnt == 0 && band_cnt == 1)
-                {
-                    Multiway_Partitioning.factorize_band(new_stage, prev_stage, conditions);
-                }
-                else
-                {
-                    System.err.println("Multiway Partitioning is currently supported only for a single ineq/non-eq/band predicate");
-                    System.exit(1);
-                }                
-            }
-            else if (method.equals("shared_ranges"))
-            {
-                if (ineq_cnt == 1 && neq_cnt == 0 && band_cnt == 0)
-                {
-                    // A single inequality condition and maybe some equalities
-                    Shared_Ranges.factorize_inequality(new_stage, prev_stage, conditions);
-                    set_bottom_up_implementation("iterative");
-                }                
-                else
-                {
-                    System.err.println("Shared ranges is currently supported only for a single inequality predicate");
-                    System.exit(1);                   
-                }
-            }
-            else
-            {
-                System.err.println("Unrecognized method");
-                System.exit(1);                            
-            }
-
 
             // Remove dangling nodes
             new_stage.removeIf(node -> node.get_number_of_children() == 0);
@@ -236,7 +239,7 @@ public class DP_Path_ThetaJoin_Instance extends DP_Problem_Instance
         instance.print_edges();
 
         // Ranked enumeration
-        DP_Anyk_Iterator iter = new DP_Recursive(instance);
+        DP_Anyk_Iterator iter = new DP_Recursive(instance, null);
         //DP_Anyk_Iterator iter = new DP_Lazy(instance, null);
         DP_Solution sol;
         while (true)

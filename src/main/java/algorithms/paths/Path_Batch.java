@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import algorithms.Configuration;
 import entities.Tuple;
 import entities.paths.DP_Decision;
 import entities.paths.DP_Problem_Instance;
@@ -38,9 +39,9 @@ public class Path_Batch extends DP_Anyk_Iterator
     */
     protected int current_index;
 
-	public Path_Batch(DP_Problem_Instance inst)
+	public Path_Batch(DP_Problem_Instance inst, Configuration conf)
     {
-        super(inst);
+        super(inst, conf);
         this.all_solutions = new ArrayList<Path_Query_Solution>();
         find_all_solutions();
         this.current_index = -1;
@@ -48,7 +49,7 @@ public class Path_Batch extends DP_Anyk_Iterator
 
 	public Path_Batch(Path_Batch other)
     {
-        super(other.instance);
+        super(other.instance, other.conf);
         this.all_solutions = other.all_solutions;
         this.current_index = -1;
     }

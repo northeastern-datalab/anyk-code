@@ -1,5 +1,6 @@
 package algorithms.paths;
 
+import algorithms.Configuration;
 import entities.paths.DP_Problem_Instance;
 import entities.paths.Path_Query_Solution;
 
@@ -21,9 +22,9 @@ import entities.paths.Path_Query_Solution;
 */
 public class Path_BatchSorting extends Path_Batch
 {
-	public Path_BatchSorting(DP_Problem_Instance inst)
+	public Path_BatchSorting(DP_Problem_Instance inst, Configuration conf)
     {
-        super(inst);
+        super(inst, conf);
         // The superclass Path_Batch stores all solutions in all_solutions list but does not sort them
         sort_results();
     }

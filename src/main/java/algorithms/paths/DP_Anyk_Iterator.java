@@ -1,5 +1,6 @@
 package algorithms.paths;
 
+import algorithms.Configuration;
 import entities.paths.DP_Problem_Instance;
 import entities.paths.DP_Solution;
 
@@ -19,6 +20,10 @@ public abstract class DP_Anyk_Iterator
      * The DP problem to run any-k on.
     */
     public DP_Problem_Instance instance;
+    /** 
+     * The DP problem to run any-k on.
+    */
+    public Configuration conf;
     /** 
      * An identifier for the object (the class provides a setter/getter for that).
     */
@@ -41,9 +46,10 @@ public abstract class DP_Anyk_Iterator
 	}
 
     // Initializes the iterator
-	public DP_Anyk_Iterator(DP_Problem_Instance inst)
+	public DP_Anyk_Iterator(DP_Problem_Instance inst, Configuration conf)
     {
     	this.instance = inst;
+        this.conf = conf;
     }
 
 	/** 

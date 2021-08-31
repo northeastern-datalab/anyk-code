@@ -455,7 +455,7 @@ public class SimpleCycle_Anyk_Iterator
         DP_Path_Equijoin_Instance dp_instance = new DP_Path_Equijoin_Instance(query);
 
         dp_instance.bottom_up();
-        DP_Anyk_Iterator batch = new Path_Batch(dp_instance);
+        DP_Anyk_Iterator batch = new Path_Batch(dp_instance, null);
 
         Path_Query_Solution solution;
         Tuple new_tuple;
@@ -496,12 +496,12 @@ public class SimpleCycle_Anyk_Iterator
     private DP_Anyk_Iterator initialize_iterator(DP_Problem_Instance instance)
     {
         DP_Anyk_Iterator iter = null;
-        if (anyk_alg.equals("Eager")) iter = new DP_Eager(instance, heap_type);
-        else if (anyk_alg.equals("All")) iter = new DP_All(instance, heap_type);
-        else if (anyk_alg.equals("Take2")) iter = new DP_Take2(instance, heap_type);
-        else if (anyk_alg.equals("Lazy")) iter = new DP_Lazy(instance, heap_type);
-        else if (anyk_alg.equals("Recursive")) iter = new DP_Recursive(instance);
-        else if (anyk_alg.equals("BatchSorting")) iter = new Path_BatchSorting(instance);
+        if (anyk_alg.equals("Eager")) iter = new DP_Eager(instance, null);
+        else if (anyk_alg.equals("All")) iter = new DP_All(instance, null);
+        else if (anyk_alg.equals("Take2")) iter = new DP_Take2(instance, null);
+        else if (anyk_alg.equals("Lazy")) iter = new DP_Lazy(instance, null);
+        else if (anyk_alg.equals("Recursive")) iter = new DP_Recursive(instance, null);
+        else if (anyk_alg.equals("BatchSorting")) iter = new Path_BatchSorting(instance, null);
         else
         {
             System.err.println("Any-k algorithm not recognized.");

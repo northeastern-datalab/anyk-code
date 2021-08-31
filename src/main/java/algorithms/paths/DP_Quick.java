@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
+import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
 import entities.paths.DP_Problem_Instance;
@@ -23,9 +24,9 @@ import entities.paths.DP_Problem_Instance;
 */
 public class DP_Quick extends DP_Part
 {
-	public DP_Quick(DP_Problem_Instance inst, String heap_type)
+	public DP_Quick(DP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst, heap_type);
+    	super(inst, conf);
 
         // Deprecated - initialization happens on the fly
         // initialize_partial_order_DFS(instance.starting_node);
@@ -44,16 +45,15 @@ public class DP_Quick extends DP_Part
         // Call get_next once to remove the best element
         decisions.next_idx = 0;
         get_next_iqs(decisions);
+
+        decisions.partial_order_computed = true;
     }
 
     public List<DP_Decision> get_successors(DP_Decision dec)
     {
         DP_DecisionSet decision_set = dec.belongs_to();
         if (!decision_set.partial_order_computed)
-        {
             initialize_partial_order(decision_set);
-            decision_set.partial_order_computed = true;
-        }
         // Whenever we want to find the successor, first check if we have already computed it
         if (!dec.successors.isEmpty()) return dec.successors;
 

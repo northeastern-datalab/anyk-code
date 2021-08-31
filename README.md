@@ -56,7 +56,7 @@ To compile, navigate to the root directory of the project and run:
 ```
 mvn package
 ```
-Successful comilation will produce a jar file in `/target/` from which a class can be executed, e.g.
+Successful comilation will produce a jar file in `/target/` from which classes that implement a `main` function can be executed, e.g.
 ```
 java -cp target/any-k-1.0.jar entities.paths.DP_Path_Equijoin_Instance
 ```
@@ -64,6 +64,50 @@ java -cp target/any-k-1.0.jar entities.paths.DP_Path_Equijoin_Instance
 
 ## Reproducibility of Experiments
 [Experiments/VLDB20/README.md](https://github.com/northeastern-datalab/anyk-code/blob/master/Experiments/VLDB20/README.md) contains a detailed description of how to reproduce the experimental results reported in the VLDB 2020 paper.
+
+
+## Running on your own Data
+The first step is to convert the data into a format that is recognized by the parser. The expected input format is:
+
+```
+Relation [RelationName]
+[Attribute1] [Attribute2] [Attribute3] ...
+[val1] [val2] [val3]
+[val1'] [val2'] [val3']
+...
+End of [RelationName]
+Relation [RelationName']
+...
+```
+You can generate an example synthetic file by running the synthetic data generator:
+```
+java -cp target/any-k-1.0.jar data.BinaryRandomPattern -q "path" -n 200 -l 3 -dom 100 -o example.in
+```
+The above will create a 3-path instance with 3 binary relations of size 200, drawn unifromly at random from a domain of size 100. The input file will be saved as `example.in`. 
+
+Next, you need to make sure that the join query you wish to run is currently supported by the code. These are:
+* Equi-join path queries, including binary joins (via entities.paths.DP_Path_Equijoin_Instance)
+* Equi-join star queries with binary relations (via entities.trees.TDP_BinaryStar_Equijoin_Instance)
+* Equi-join simple cycles of binary relations (via entities.cycles.SimpleCycle_Equijoin_Query)
+* Path queries with equality/inequality/non-equality/band predicates in DNF form (via entities.paths.DP_Path_ThetaJoin_Instance)
+
+Finally, you need to write an appropriate java file that reads the input and then calls the appropriate methods. Please see the files under `src/main/java/experiments` for many examples. These files go through the following steps:
+* Read certain parameters from the command line (not needed if you write your own)
+* Read the input file and construct a representation that is understood by the program
+* Specify the exact join conditions between the relations (e.g. which attributes join with which and with what type of predicate in the case of inequalities)
+* Specify which column is used for ranking (sum-of-weights)
+* Initialize a measurements object that keeps track of time and memory usage
+* Run an any-k algorithm by calling "next" on an iterator object k times
+* Write out the measurements to stdout
+
+Instead of writing your own file, you can try to use the existing ones by setting the appropriate parameters from the command line. For example, to run the "Lazy" any-k algorithm on the previously generated example:
+```
+java -cp target/any-k-1.0.jar experiments.Path_Equijoin -a Lazy -i example.in -n 300 -l 3 -dom 100
+```
+Execute the class without parameters to get a list of the possible options.
+
+#### Note
+Setting the algorithm to UnrankedEnum in the command line arguments of experiments.Path_Equijoin will run an unranked enumeration algorithm on the instance.
 
 
 ## License
@@ -88,13 +132,15 @@ If you use this code in your work, please cite:
 ```
 and/or
 ```bibtex
-@article{DBLP:journals/corr/abs-2101-12158,
+@article{TziavelisGR:2021,
   author    = {Nikolaos Tziavelis and Wolfgang Gatterbauer and Mirek Riedewald},
   title     = {Beyond Equi-joins: Ranking, Enumeration and Factorization},
-  journal   = {CoRR},
-  volume    = {abs/2101.12158},
-  year      = {2021},
-  url       = {https://arxiv.org/abs/2101.12158}
+  journal = {Proc. {VLDB} Endow.},
+  volume = {14},
+  number = {11},
+  pages = {2599--2612},
+  year = {2021},
+  doi = {10.14778/3476249.3476306}
 }
 ```
 

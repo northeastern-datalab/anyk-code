@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
 import entities.paths.DP_Problem_Instance;
@@ -36,9 +37,9 @@ public class DP_Recursive extends DP_Anyk_Iterator
 {
     private DP_Suffix_Solution latest_solution;
 
-    public DP_Recursive(DP_Problem_Instance inst)
+    public DP_Recursive(DP_Problem_Instance inst, Configuration conf)
     {
-        super(inst);
+        super(inst, conf);
         this.latest_solution = null;
     }
 

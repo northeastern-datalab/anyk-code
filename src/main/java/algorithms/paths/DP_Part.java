@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Stack;
 
+import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
 import entities.paths.DP_Prefix_Solution;
 import entities.paths.DP_Problem_Instance;
 import entities.paths.DP_Solution;
-
+import entities.paths.DP_State_Node;
 /** 
  * Implementation of Anyk-Part for DP, a ranked enumeration algorithm that relies on the Lawler procedure.
  * The different variants are implemented as subclasses, each one implementing the abstract methods differently.<br>
@@ -46,34 +48,20 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 	 * By convention, latest_sidetrack_stage of the top-1 solution is 1.
 	*/	
 	protected int latest_sidetrack_stage;
-	/** 
-	 * Used to specify different implementations of {@link #global_pq}.
-	*/	
-	protected String heap_type;
 
 	/** 
 	 * @param inst The DP problem to run any-k on.
-	 * @param heap_type A parameter that is used to select an implementation for the global PQ. 
-	 * 					By default (null), a binary heap is used.
+	 * @param conf A configuration of execution parameters.
 	*/		
-	public DP_Part(DP_Problem_Instance inst, String heap_type)
+	public DP_Part(DP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst);
+    	super(inst, conf);
     	this.latest_solution = null;
 		this.latest_sidetrack_stage = -1;
-		// Choose a heap implementation
-		/*
-		if (heap_type == null)
-		{
-			if (stages_no < 10) this.heap_type = "Lib_BHeap";
-			else this.heap_type = "Lib_BHeap_Bulk";
-		}
-		*/
-		this.heap_type = heap_type;
-		// Just use a simple binary heap
-
+		
     	// Initialize the global PQ with an empty prefix (that contains only the starting node)
 		// this.global_pq = new Priority_Queue<DP_Prefix_Solution>(this.heap_type);
+		// Just use a simple binary heap
 		this.global_pq = new PriorityQueue<DP_Prefix_Solution>();
     	// The prefix we start with contains only the best decision to go from starting_node to stage 1
     	// That way, we guarantee that for top-2 we start taking successor solutions from stage 1
@@ -82,6 +70,11 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 	    	DP_Prefix_Solution starting_prefix = new DP_Prefix_Solution(instance.starting_node.get_best_decision());
 	    	this.global_pq.add(starting_prefix);    		
 		}
+
+		// By default, initialize the data structures needed lazily
+		// (i.e., the first time they are accesed)
+		if ((conf != null) && !conf.initialization_laziness)
+			initialize_data_structures();
     }
 
     public DP_Solution get_next()
@@ -91,8 +84,8 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 
     	// If no latest_solution has been stored, then this is the first call to this method
     	// In that case, the PQ contains only one prefix solution (the empty one) 
-    	// which when expanded will give the top-1 solution  
-    	// In all other cases, we first need to generate successor solutions  	
+    	// which when expanded will give the top-1 solution.  
+    	// In all other cases, we first need to generate successor solutions.  	
     	if (latest_solution != null)
     	{
     		// We have to generate successor solutions for all stages which are between 
@@ -102,8 +95,8 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 			for (int sg = last_stage; sg >= latest_sidetrack_stage; sg--)
     		{
 				//System.out.println("Taking successors of decisions between " + (sg - 1) + " and " + sg);
-    			// In stage sg, we take the successors of decisions between sg-1 and sg
-    			// Consider the successors of the latest decision and generate one solution for each one
+    			// In stage sg, we take the successors of decisions between sg-1 and sg.
+    			// Consider the successors of the latest decision and generate one solution for each one.
     			for (DP_Decision succ : get_successors(curr.get_latest_decision()))
     			{
     				new_candidate = curr.create_successor(succ);
@@ -180,6 +173,29 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 	 * Find the successors of a given decision among the other decisions in the {@link entities.paths.DP_DecisionSet}.
 	 * The way that successors are computed depends on the variant (subclass).
 	 * @param dec The decision whose successors will be computed.
+	 * @return DP_Decision The successor decisions according to the (partial) order.
 	 */
     public abstract List<DP_Decision> get_successors(DP_Decision dec);
+
+	/** 
+	 * Initializes the data structures needed for all nodes.
+	 * Visits all the nodes in a DFS traversal.
+	 */
+    public void initialize_data_structures()
+	{
+		Stack<DP_State_Node> dfs_stack = new Stack<DP_State_Node>();
+		dfs_stack.push(instance.starting_node);
+
+		DP_State_Node curr_node;
+		while (!dfs_stack.isEmpty())
+		{
+			curr_node = dfs_stack.pop();
+			initialize_partial_order(curr_node.decisions);
+			for (DP_Decision dec : curr_node.get_decisions())
+			{
+				if (!dec.target.decisions.partial_order_computed)
+					dfs_stack.push(dec.target);
+			}
+		}
+	}
 }

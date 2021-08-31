@@ -3,6 +3,7 @@ package algorithms.paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
 import entities.paths.DP_Problem_Instance;
@@ -19,9 +20,9 @@ import entities.paths.DP_Problem_Instance;
 */
 public class DP_All extends DP_Part
 {
-	public DP_All(DP_Problem_Instance inst, String heap_type)
+	public DP_All(DP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst, heap_type);
+    	super(inst, conf);
 
         // Deprecated - initialization happens on the fly        
         // For each decision set, make the best decision point to all the others as its successors
@@ -39,17 +40,16 @@ public class DP_All extends DP_Part
         DP_Decision best_dec = decisions.best_decision;
         for (DP_Decision dec : decisions.list_of_decisions)
             if (dec != best_dec)
-                best_dec.successors.add(dec);            
+                best_dec.successors.add(dec);      
+                
+        decisions.partial_order_computed = true;
     }
 
     public List<DP_Decision> get_successors(DP_Decision dec)
     {
         DP_DecisionSet decision_set = dec.belongs_to();
         if (!decision_set.partial_order_computed)
-        {
             initialize_partial_order(decision_set);
-            decision_set.partial_order_computed = true;
-        }
         return dec.successors;
     }
 }

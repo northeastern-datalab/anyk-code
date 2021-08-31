@@ -70,7 +70,12 @@ for i in range(len(algorithms)):
 	max_k = 0
 
 	# Read file
-	fp1 = open(inFileName + "_" + alg + ".out")
+	try:
+		fp1 = open(inFileName + "_" + alg + ".out")
+	except IOError:
+		println("Could not open file for " + title)
+		sys.exit(1)
+
 	line = fp1.readline()
 	while line:
 
@@ -91,6 +96,11 @@ for i in range(len(algorithms)):
 		line = fp1.readline()
 	fp1.close()
 
+	# If no data points were read, return an error
+	if not times_aux:
+		println("No data points to plot found for " + title)
+		sys.exit(1)
+		
 	# If some instances contained more data points than others, cut them off
 	instances_no = len(times_aux[0])
 	while (len(times_aux[-1]) < instances_no):
@@ -133,3 +143,13 @@ ax.set(xlabel="Time (sec)", ylabel="#Results")
 #plt.title(title)
 plt.savefig(outFileName + ".pdf", format="pdf", bbox_inches="tight")
 plt.savefig(outFileName + ".png", format="png", bbox_inches="tight")
+
+## Legend
+plt.rc('font', family='serif', size=20) 
+
+h, l = ax.get_legend_handles_labels()
+figlegend = plt.figure(figsize=(4 * len(algorithms), 0.5))
+ax_leg = figlegend.add_subplot(111)
+ax_leg.legend(h, l, loc='center', ncol=len(algorithms), fancybox=True, shadow=True, prop={'size':30}, markerscale=2)
+ax_leg.axis('off')
+figlegend.savefig("plots/legend.pdf", format="pdf", bbox_inches="tight")

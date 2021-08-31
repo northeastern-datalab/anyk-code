@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
 import entities.paths.DP_Problem_Instance;
@@ -21,9 +22,9 @@ import entities.paths.DP_Problem_Instance;
 */
 public class DP_Take2 extends DP_Part
 {
-	public DP_Take2(DP_Problem_Instance inst, String heap_type)
+	public DP_Take2(DP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst, heap_type);
+    	super(inst, conf);
     }
     
     public void initialize_partial_order(DP_DecisionSet decisions)
@@ -79,16 +80,15 @@ public class DP_Take2 extends DP_Part
             }
         }
         */
+
+        decisions.partial_order_computed = true;
     }
     
     public List<DP_Decision> get_successors(DP_Decision dec)
     {
         DP_DecisionSet decision_set = dec.belongs_to();
         if (!decision_set.partial_order_computed)
-        {
             initialize_partial_order(decision_set);
-            decision_set.partial_order_computed = true;
-        }
         // assert dec.successors.size() <= 2;
         // We can have three successors if we use a unique child for the root node of the heap!
         // assert dec.successors.size() <= 3;

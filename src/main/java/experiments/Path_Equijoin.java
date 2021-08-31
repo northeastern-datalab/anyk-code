@@ -10,6 +10,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import algorithms.Configuration;
 import algorithms.paths.DP_All;
 import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Eager;
@@ -112,6 +113,7 @@ public class Path_Equijoin
 
 
         // ======= Initialize parameters =======
+        Configuration conf = new Configuration();
         Path_Equijoin_Query query = null;
 		DP_Path_Equijoin_Instance instance;
         String input_file;
@@ -121,7 +123,6 @@ public class Path_Equijoin
         int arity = -1;
         int max_k;
         int sample_rate = -2;
-        String heap_type;
         if (cmd.hasOption("relationArity")) arity = Integer.parseInt(cmd.getOptionValue("relationArity"));
         else arity = 2;
         boolean self_join = false;
@@ -150,8 +151,7 @@ public class Path_Equijoin
             sample_rate = (int) Math.ceil(estimated_result_size / 500.0); 
         }
         else sample_rate = 1;
-        if (cmd.hasOption("heap type")) heap_type = cmd.getOptionValue("heap type");
-        else heap_type = null;   // let the classes choose by themselves
+        if (cmd.hasOption("heap type")) conf.set_heap_type(cmd.getOptionValue("heap type"));
 
 
 
@@ -229,14 +229,14 @@ public class Path_Equijoin
 
             DP_Anyk_Iterator iter = null;
             // Run any-k
-            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, heap_type);
-            else if (algorithm.equals("All")) iter = new DP_All(instance, heap_type);
-            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, heap_type);
-            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, heap_type);
-            else if (algorithm.equals("Quick")) iter = new DP_Quick(instance, heap_type);
-            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance);
-            else if (algorithm.equals("BatchSorting")) iter = new Path_BatchSorting(instance);
-            else if (algorithm.equals("Batch")) iter = new Path_Batch(instance);
+            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
+            else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
+            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
+            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
+            else if (algorithm.equals("Quick")) iter = new DP_Quick(instance, conf);
+            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);
+            else if (algorithm.equals("BatchSorting")) iter = new Path_BatchSorting(instance, conf);
+            else if (algorithm.equals("Batch")) iter = new Path_Batch(instance, conf);
             else
             {
                 System.err.println("Any-k algorithm not recognized.");

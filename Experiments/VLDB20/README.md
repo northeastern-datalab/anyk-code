@@ -35,7 +35,7 @@ To compile, navigate to the root directory of the project and run:
 ```
 mvn package
 ```
-Successful comilation will produce a jar file in `/target/` from which a class can be executed, e.g.
+Successful comilation will produce a jar file in `/target/` from which classes that implement a `main` function can be executed, e.g.
 ```
 java -cp target/any-k-1.0.jar entities.paths.DP_Path_Equijoin_Instance
 ```
@@ -44,13 +44,24 @@ java -cp target/any-k-1.0.jar entities.paths.DP_Path_Equijoin_Instance
 
 ## Datasets Used
 
+From here on, we assume that the current directory is `Experiments/VLDB20/`.
+
 ### Synthetic data generator: 
 
-The produced jar contains the generators for the synthetic data experiments in the `data/` package. 
+The produced jar contains generators for the synthetic data in the `data/` package. To generate a syntetic instance:
+
+```
+java -cp ../../target/any-k-1.0.jar data.BinaryRandomPattern -q "path" -n 200 -l 3 -dom 100 -o Synthetic_data/inputs/example.in
+```
+
+The above will create a 3-path instance with 3 binary relations of size 200, drawn unifromly at random from a domain of size 100. The input file will be saved in `Synthetic_data/inputs/`. 
+
+The other class in the package (`Cycle_HeavyLightPattern`) creates a certain join pattern that is interesting for cyclic queries.
 
 ### Real dataset repositories:
 * Twitter: Available [here](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html)
 * BitcoinOTC: Available [here](http://datasets.syr.edu/datasets/Twitter.html)
+
 ```
 cd Real_data/inputs
 ./create_input.sh

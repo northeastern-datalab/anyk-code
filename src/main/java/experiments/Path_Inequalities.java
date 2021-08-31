@@ -12,13 +12,16 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import algorithms.Configuration;
 import algorithms.paths.DP_All;
 import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Eager;
 import algorithms.paths.DP_Lazy;
 import algorithms.paths.DP_Recursive;
+import algorithms.paths.DP_Solution_Iterator;
 import algorithms.paths.DP_Take2;
 import algorithms.paths.Path_Batch;
+import algorithms.paths.Path_BatchHeap;
 import algorithms.paths.Path_BatchSorting;
 import entities.Join_Predicate;
 import entities.Relation;
@@ -33,7 +36,7 @@ import util.Measurements;
 
 /** 
  * This class provides a main function that receives execution parameters from the command line
- * and runs experiments for join queries with inequalities
+ * and runs experiments for join queries with inequalities (without disjunctions)
  * where the joined relations are organized in a path.
  * All measurements are written in standard output.
  * Call with no arguments to get a list of accepted options.
@@ -89,6 +92,10 @@ public class Path_Inequalities
         heap_type_option.setRequired(false);
         options.addOption(heap_type_option);
 
+        Option no_lazy_option = new Option("nl", "no laziness", false, "turns off the lazy intialization of data structures for any-k algorithms");
+        no_lazy_option.setRequired(false);
+        options.addOption(no_lazy_option);
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;
@@ -106,6 +113,7 @@ public class Path_Inequalities
 
 
         // ======= Initialize parameters =======
+        Configuration conf = new Configuration();
         Path_ThetaJoin_Query query = null;
 		DP_Problem_Instance instance;
         String input_file = cmd.getOptionValue("input");
@@ -126,9 +134,8 @@ public class Path_Inequalities
         {
             sample_rate = 1;
         }
-        String heap_type;
-        if (cmd.hasOption("heap type")) heap_type = cmd.getOptionValue("heap type");
-        else heap_type = null;   // let the classes choose by themselves
+        if (cmd.hasOption("heap type")) conf.set_heap_type(cmd.getOptionValue("heap type"));
+        if (cmd.hasOption("no laziness")) conf.set_initialization_laziness(false);
         String factorization_method;
         if (cmd.hasOption("factorization method")) factorization_method = cmd.getOptionValue("factorization method");
         else factorization_method = null;   // let the classes choose by themselves
@@ -150,7 +157,7 @@ public class Path_Inequalities
             query = new Path_ThetaJoin_Query(database);
             ps = new ArrayList<Join_Predicate>();
             ps.add(new Join_Predicate("IL", 1, 0, null));
-            query.set_join_conditions(ps);
+            query.set_join_conditions_as_conjunction(ps);
         }
         else if (query_type.equals("SynQ2"))
         {
@@ -161,9 +168,26 @@ public class Path_Inequalities
             ps = new ArrayList<Join_Predicate>();
             ps.add(new Join_Predicate("B", 1, 0, 50.0));
             ps.add(new Join_Predicate("N", 0, 1, null));
-            query.set_join_conditions(ps);
+            query.set_join_conditions_as_conjunction(ps);
         }
-        else if (query_type.equals("Q1"))
+        // TPC-H
+        else if (query_type.equals("QT1"))
+        {
+            int weight_attribute = 5;
+            db_parser = new DatabaseParser(weight_attribute);
+            database = db_parser.parse_file(input_file);
+            // We have only one relation (lineitem)
+            // Add the same relation as many times as needed to search for a chain of length l
+            for (int i = 1; i < l; i++) database.add(database.get(0));
+            query = new Path_ThetaJoin_Query(database);
+            ps = new ArrayList<Join_Predicate>();
+            ps.add(new Join_Predicate("E", 2, 2, null));
+            ps.add(new Join_Predicate("IL", 4, 4, null));
+            ps.add(new Join_Predicate("IL", 6, 6, null));
+            query.set_join_conditions_as_conjunction(ps);
+        }
+        // Reddit
+        else if (query_type.equals("QR1"))
         {
             int weight_attribute = 3;
             db_parser = new DatabaseParser(weight_attribute);
@@ -175,24 +199,9 @@ public class Path_Inequalities
             ps = new ArrayList<Join_Predicate>();
             ps.add(new Join_Predicate("E", 1, 0, null));
             ps.add(new Join_Predicate("IL", 2, 2, null));
-            query.set_join_conditions(ps);
+            query.set_join_conditions_as_conjunction(ps);
         }
-        else if (query_type.equals("Q2"))
-        {
-            int weight_attribute = 4;
-            db_parser = new DatabaseParser(weight_attribute);
-            database = db_parser.parse_file(input_file);
-            // Our graphs have only one relation (edges)
-            // Add the same relation as many times as needed to search for paths of length l
-            for (int i = 1; i < l; i++) database.add(database.get(0));
-            query = new Path_ThetaJoin_Query(database);
-            ps = new ArrayList<Join_Predicate>();
-            ps.add(new Join_Predicate("E", 1, 0, null));
-            ps.add(new Join_Predicate("IL", 2, 2, null));
-            ps.add(new Join_Predicate("IG", 3, 3, null));
-            query.set_join_conditions(ps);
-        }
-        else if (query_type.equals("Q3"))
+        else if (query_type.equals("QR2"))
         {
             int weight_attribute = 5;
             db_parser = new DatabaseParser(weight_attribute);
@@ -205,9 +214,10 @@ public class Path_Inequalities
             ps.add(new Join_Predicate("E", 1, 0, null));
             ps.add(new Join_Predicate("IL", 2, 2, null));
             ps.add(new Join_Predicate("IG", 3, 3, null));
-            query.set_join_conditions(ps);
+            query.set_join_conditions_as_conjunction(ps);
         }
-        else if (query_type.startsWith("Q4_"))
+        // BirdsOceania
+        else if (query_type.startsWith("QB1_"))
         {
             int weight_attribute = 3;
             double epsilon = Double.parseDouble(query_type.split("_")[1]) / 1000.0;
@@ -220,7 +230,7 @@ public class Path_Inequalities
             ps = new ArrayList<Join_Predicate>();
             ps.add(new Join_Predicate("B", 1, 1, epsilon));
             ps.add(new Join_Predicate("B", 2, 2, epsilon));
-            query.set_join_conditions(ps);
+            query.set_join_conditions_as_conjunction(ps);
         }
         else
         {
@@ -251,13 +261,26 @@ public class Path_Inequalities
             long startTime = System.nanoTime();
             // Before starting the real clock, compute the entire result set
             instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            Path_Batch batch = new Path_Batch(instance);
+            Path_Batch batch = new Path_Batch(instance, conf);
             double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
             System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
             // Now start the real clock
             measurements = new Measurements(sample_rate, max_k);
             // Time the sorting of the results
             iter = new Path_BatchSorting(batch);
+        }
+        else if (algorithm.equals("BatchHeap"))
+        {
+            long startTime = System.nanoTime();
+            // Before starting the real clock, compute the entire result set
+            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+            Path_Batch batch = new Path_Batch(instance, conf);
+            double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
+            System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
+            // Now start the real clock
+            measurements = new Measurements(sample_rate, max_k);
+            // Time the construction of the PQ
+            iter = new Path_BatchHeap(batch);
         }
         else if (algorithm.startsWith("QEq_"))
         {
@@ -271,7 +294,7 @@ public class Path_Inequalities
                 // To avoid consuming more memory return the DP solutions of batch
                 // instead of materializing a new relation
                 DP_Path_ThetaJoin_Instance binary_dp_instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-                Path_Batch batch_alg = new Path_Batch(binary_dp_instance);
+                Path_Batch batch_alg = new Path_Batch(binary_dp_instance, conf);
                 // The solutions have been computed
                 double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
                 System.out.println("Not measured time for creating the quadratic relations: " + elapsedTime + " sec");
@@ -300,17 +323,35 @@ public class Path_Inequalities
             instance = new DP_Path_Equijoin_Instance(quadratic_equijoin);
             instance.bottom_up();
 
-            if (algorithm.endsWith("Eager")) iter = new DP_Eager(instance, heap_type);
-            else if (algorithm.endsWith("All")) iter = new DP_All(instance, heap_type);
-            else if (algorithm.endsWith("Take2")) iter = new DP_Take2(instance, heap_type);
-            else if (algorithm.endsWith("Lazy")) iter = new DP_Lazy(instance, heap_type);
-            else if (algorithm.endsWith("Recursive")) iter = new DP_Recursive(instance);
-            else if (algorithm.endsWith("BatchSorting")) iter = new Path_BatchSorting(instance);         
+            if (algorithm.endsWith("Eager")) iter = new DP_Eager(instance, conf);
+            else if (algorithm.endsWith("All")) iter = new DP_All(instance, conf);
+            else if (algorithm.endsWith("Take2")) iter = new DP_Take2(instance, conf);
+            else if (algorithm.endsWith("Lazy")) iter = new DP_Lazy(instance, conf);
+            else if (algorithm.endsWith("Recursive")) iter = new DP_Recursive(instance, conf);
+            else if (algorithm.endsWith("BatchSorting")) iter = new Path_BatchSorting(instance, conf);         
             else
             {
                 System.err.println("Any-k algorithm not recognized.");
                 System.exit(1);
             }
+        }
+        else if (algorithm.equals("UnrankedEnum"))
+        {
+            // Start the clock
+            measurements = new Measurements(sample_rate, max_k);
+            // Run unranked enumeration on the theta-join query
+            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+            DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
+            DP_Solution solution;
+            for (int k = 1; k <= max_k; k++)
+            {
+                solution = iter_unranked.get_next();
+                if (solution == null) break;
+                else measurements.add_k(solution.solutionToTuples());
+            }
+            // Finalize and print everyting 
+            measurements.print();
+            return;
         }
         else
         {
@@ -320,11 +361,11 @@ public class Path_Inequalities
             instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
             instance.bottom_up();
 
-            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, heap_type);
-            else if (algorithm.equals("All")) iter = new DP_All(instance, heap_type);
-            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, heap_type);
-            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, heap_type);
-            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance);       
+            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
+            else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
+            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
+            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
+            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);       
             else
             {
                 System.err.println("Any-k algorithm not recognized.");

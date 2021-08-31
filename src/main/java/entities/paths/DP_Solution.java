@@ -75,6 +75,20 @@ public abstract class DP_Solution// implements Bulk_Comparable
     	else return 0;
     }
 
+    @Override
+    public int hashCode() 
+    {
+        return solutionToTuples().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) 
+    {
+        if (!(obj instanceof DP_Solution))
+            return false;
+        DP_Solution other = (DP_Solution) obj;
+        return this.solutionToTuples().equals(other.solutionToTuples());
+    }
     
     /** 
      * @return String
