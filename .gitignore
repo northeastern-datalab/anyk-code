@@ -48,9 +48,12 @@ dependency-reduced-pom.xml
 ###################
 *.log
 
+# Text files #
+###################
+*.txt
+
 # Other #
 ###################
 org.eclipse.*
 launch.json
 settings.json
-send_code.sh

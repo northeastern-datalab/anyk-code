@@ -107,7 +107,7 @@ java -cp target/any-k-1.0.jar experiments.Path_Equijoin -a Lazy -i example.in -n
 Execute the class without parameters to get a list of the possible options.
 
 #### Note
-Setting the algorithm to UnrankedEnum in the command line arguments of experiments.Path_Equijoin will run an unranked enumeration algorithm on the instance.
+Setting the algorithm to UnrankedEnum in the command line arguments of experiments.Path_Equijoin will run an unranked enumeration algorithm on the instance. See the example in [src/main/java/experiments/Path_Unranked.java](https://github.com/northeastern-datalab/anyk-code/blob/master/src/main/java/experiments/Path_Unranked.java).
 
 
 ## License

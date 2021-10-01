@@ -59,8 +59,8 @@ The above will create a 3-path instance with 3 binary relations of size 200, dra
 The other class in the package (`Cycle_HeavyLightPattern`) creates a certain join pattern that is interesting for cyclic queries.
 
 ### Real dataset repositories:
-* Twitter: Available [here](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html)
-* BitcoinOTC: Available [here](http://datasets.syr.edu/datasets/Twitter.html)
+* Twitter: Available [here](http://datasets.syr.edu/datasets/Twitter.html)
+* BitcoinOTC: Available [here](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html)
 
 ```
 cd Real_data/inputs
