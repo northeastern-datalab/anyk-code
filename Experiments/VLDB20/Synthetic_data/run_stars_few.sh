@@ -9,71 +9,77 @@ OPTS=$MEM
 ALG_LIST=("Eager" "All" "Take2" "Lazy" "Recursive") 
 
 
-l=4
-for i in $(seq 1 $ITERS_STARS_FEW);
-do
-    for n in 1000000
-    do
-        for d in $((n / 10))
+if [ "$LENGTH4" = true ] ; then
+        l=4
+        for i in $(seq 1 $ITERS_STARS_FEW);
         do
-                # Create the input if it doesn't exist
-                INPUT="${DATA_PATH}star_n${n}_l${l}_d${d}_i${i}.in"
-                if [ ! -f $INPUT ]; then
-                        java -cp ${JAR_PATH} data.BinaryRandomPattern -q "star" -n $n -l $l -dom $d -o $INPUT
-                fi 
-
-                for alg in "${ALG_LIST[@]}"
+        for n in 1000000
+        do
+                for d in $((n / 10))
                 do
-                        k=$((n / 2))
-                        java $OPTS -cp ${JAR_PATH} experiments.BinaryStar_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds -k $k >> "${OUT_PATH}star_n${n}_l${l}_d${d}_${alg}.out"
+                        # Create the input if it doesn't exist
+                        INPUT="${DATA_PATH}star_n${n}_l${l}_d${d}_i${i}.in"
+                        if [ ! -f $INPUT ]; then
+                                java -cp ${JAR_PATH} data.BinaryRandomPattern -q "star" -n $n -l $l -dom $d -o $INPUT
+                        fi 
+
+                        for alg in "${ALG_LIST[@]}"
+                        do
+                                k=$((n / 2))
+                                java $OPTS -cp ${JAR_PATH} experiments.BinaryStar_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds -k $k >> "${OUT_PATH}star_n${n}_l${l}_d${d}_${alg}.out"
+                        done
                 done
         done
-    done
-    echo "Done with n=${n}, l=${l}, d=${d}, iter ${i}"
-done
+        echo "Done with n=${n}, l=${l}, d=${d}, iter ${i}"
+        done
+fi
 
-l=6
-for i in $(seq 1 $ITERS_STARS_FEW);
-do
-    for n in 1000000
-    do
-        for d in $((n / 10))
+if [ "$LENGTH6" = true ] ; then
+        l=6
+        for i in $(seq 1 $ITERS_STARS_FEW);
         do
-                # Create the input if it doesn't exist
-                INPUT="${DATA_PATH}star_n${n}_l${l}_d${d}_i${i}.in"
-                if [ ! -f $INPUT ]; then
-                        java -cp ${JAR_PATH} data.BinaryRandomPattern -q "star" -n $n -l $l -dom $d -o $INPUT
-                fi 
-
-                for alg in "${ALG_LIST[@]}"
+        for n in 1000000
+        do
+                for d in $((n / 10))
                 do
-                        k=$((n / 2))
-                        java $OPTS -cp ${JAR_PATH} experiments.BinaryStar_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds -k $k >> "${OUT_PATH}star_n${n}_l${l}_d${d}_${alg}.out"
+                        # Create the input if it doesn't exist
+                        INPUT="${DATA_PATH}star_n${n}_l${l}_d${d}_i${i}.in"
+                        if [ ! -f $INPUT ]; then
+                                java -cp ${JAR_PATH} data.BinaryRandomPattern -q "star" -n $n -l $l -dom $d -o $INPUT
+                        fi 
+
+                        for alg in "${ALG_LIST[@]}"
+                        do
+                                k=$((n / 2))
+                                java $OPTS -cp ${JAR_PATH} experiments.BinaryStar_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds -k $k >> "${OUT_PATH}star_n${n}_l${l}_d${d}_${alg}.out"
+                        done
                 done
         done
-    done
-    echo "Done with n=${n}, l=${l}, d=${d}, iter ${i}"
-done
+        echo "Done with n=${n}, l=${l}, d=${d}, iter ${i}"
+        done
+fi
 
-l=3
-for i in $(seq 1 $ITERS_STARS_FEW);
-do
-    for n in 1000000
-    do
-        for d in $((n / 10))
+if [ "$LENGTH3" = true ] ; then
+        l=3
+        for i in $(seq 1 $ITERS_STARS_FEW);
         do
-                # Create the input if it doesn't exist
-                INPUT="${DATA_PATH}star_n${n}_l${l}_d${d}_i${i}.in"
-                if [ ! -f $INPUT ]; then
-                        java -cp ${JAR_PATH} data.BinaryRandomPattern -q "star" -n $n -l $l -dom $d -o $INPUT
-                fi 
-                
-                for alg in "${ALG_LIST[@]}"
+        for n in 1000000
+        do
+                for d in $((n / 10))
                 do
-                        k=$((n / 2))
-                        java $OPTS -cp ${JAR_PATH} experiments.BinaryStar_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds -k $k >> "${OUT_PATH}star_n${n}_l${l}_d${d}_${alg}.out"
+                        # Create the input if it doesn't exist
+                        INPUT="${DATA_PATH}star_n${n}_l${l}_d${d}_i${i}.in"
+                        if [ ! -f $INPUT ]; then
+                                java -cp ${JAR_PATH} data.BinaryRandomPattern -q "star" -n $n -l $l -dom $d -o $INPUT
+                        fi 
+                        
+                        for alg in "${ALG_LIST[@]}"
+                        do
+                                k=$((n / 2))
+                                java $OPTS -cp ${JAR_PATH} experiments.BinaryStar_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds -k $k >> "${OUT_PATH}star_n${n}_l${l}_d${d}_${alg}.out"
+                        done
                 done
         done
-    done
-    echo "Done with n=${n}, l=${l}, d=${d}, iter ${i}"
-done
+        echo "Done with n=${n}, l=${l}, d=${d}, iter ${i}"
+        done
+fi

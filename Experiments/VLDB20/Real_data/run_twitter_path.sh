@@ -11,13 +11,32 @@ ALG_LIST=("Eager" "All" "Take2" "Lazy" "Recursive")
 
 for i in $(seq 1 $ITERS_TWITTER_PATH);
 do
-	for l in 3 4 6
-	do
+	if [ "$LENGTH4" = true ] ; then
+			l=4
 			k=1125149 # n/2
 			for alg in "${ALG_LIST[@]}"
 			do
 				java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i "${DATA_PATH}${graph}.in" -sj -l $l -ds -k $k >> "${OUT_PATH}path_${graph}_l${l}_${alg}.out"
 			done
-	done
+	fi
+
+	if [ "$LENGTH3" = true ] ; then
+			l=3
+			k=1125149 # n/2
+			for alg in "${ALG_LIST[@]}"
+			do
+				java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i "${DATA_PATH}${graph}.in" -sj -l $l -ds -k $k >> "${OUT_PATH}path_${graph}_l${l}_${alg}.out"
+			done
+	fi
+
+	if [ "$LENGTH6" = true ] ; then
+			l=6
+			k=1125149 # n/2
+			for alg in "${ALG_LIST[@]}"
+			do
+				java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i "${DATA_PATH}${graph}.in" -sj -l $l -ds -k $k >> "${OUT_PATH}path_${graph}_l${l}_${alg}.out"
+			done
+	fi
+
 	echo "Done with run ${i}"
 done

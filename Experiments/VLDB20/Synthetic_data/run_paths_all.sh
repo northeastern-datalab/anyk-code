@@ -9,68 +9,74 @@ OPTS=$MEM
 ALG_LIST=("Batch" "BatchSorting" "Eager" "All" "Take2" "Lazy" "Recursive") 
 
 
-l=4
-for i in $(seq 1 $ITERS_PATHS_ALL);
-do
-		for n in 10000
-		do
-			for d in $((n / 10))
+if [ "$LENGTH4" = true ] ; then
+	l=4
+	for i in $(seq 1 $ITERS_PATHS_ALL);
+	do
+			for n in 10000
 			do
-				# Create the input if it doesn't exist
-				INPUT="${DATA_PATH}path_n${n}_l${l}_d${d}_i${i}.in"
-				if [ ! -f $INPUT ]; then
-					java -cp ${JAR_PATH} data.BinaryRandomPattern -q "path" -n $n -l $l -dom $d -o $INPUT
-				fi  
-
-				for alg in "${ALG_LIST[@]}"
+				for d in $((n / 10))
 				do
-					java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds >> "${OUT_PATH}path_n${n}_l${l}_d${d}_${alg}.out"
+					# Create the input if it doesn't exist
+					INPUT="${DATA_PATH}path_n${n}_l${l}_d${d}_i${i}.in"
+					if [ ! -f $INPUT ]; then
+						java -cp ${JAR_PATH} data.BinaryRandomPattern -q "path" -n $n -l $l -dom $d -o $INPUT
+					fi  
+
+					for alg in "${ALG_LIST[@]}"
+					do
+						java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds >> "${OUT_PATH}path_n${n}_l${l}_d${d}_${alg}.out"
+					done
 				done
 			done
-		done
-		echo "Done with n=${n}, l=${l}, d=${d}, run ${i}"
-done
+			echo "Done with n=${n}, l=${l}, d=${d}, run ${i}"
+	done
+fi
 
-l=6
-for i in $(seq 1 $ITERS_PATHS_ALL);
-do
-		for n in 100
-		do
-			for d in $((n / 10))
+if [ "$LENGTH6" = true ] ; then
+	l=6
+	for i in $(seq 1 $ITERS_PATHS_ALL);
+	do
+			for n in 100
 			do
-				# Create the input if it doesn't exist
-				INPUT="${DATA_PATH}path_n${n}_l${l}_d${d}_i${i}.in"
-				if [ ! -f $INPUT ]; then
-					java -cp ${JAR_PATH} data.BinaryRandomPattern -q "path" -n $n -l $l -dom $d -o $INPUT
-				fi 
-
-				for alg in "${ALG_LIST[@]}"
+				for d in $((n / 10))
 				do
-					java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds >> "${OUT_PATH}path_n${n}_l${l}_d${d}_${alg}.out"
+					# Create the input if it doesn't exist
+					INPUT="${DATA_PATH}path_n${n}_l${l}_d${d}_i${i}.in"
+					if [ ! -f $INPUT ]; then
+						java -cp ${JAR_PATH} data.BinaryRandomPattern -q "path" -n $n -l $l -dom $d -o $INPUT
+					fi 
+
+					for alg in "${ALG_LIST[@]}"
+					do
+						java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds >> "${OUT_PATH}path_n${n}_l${l}_d${d}_${alg}.out"
+					done
 				done
 			done
-		done
-		echo "Done with n=${n}, l=${l}, d=${d}, run ${i}"
-done
+			echo "Done with n=${n}, l=${l}, d=${d}, run ${i}"
+	done
+fi
 
-l=3
-for i in $(seq 1 $ITERS_PATHS_ALL);
-do
-		for n in 100000
-		do
-			for d in $((n / 10))
+if [ "$LENGTH3" = true ] ; then
+	l=3
+	for i in $(seq 1 $ITERS_PATHS_ALL);
+	do
+			for n in 100000
 			do
-				# Create the input if it doesn't exist
-				INPUT="${DATA_PATH}path_n${n}_l${l}_d${d}_i${i}.in"
-				if [ ! -f $INPUT ]; then
-					java -cp ${JAR_PATH} data.BinaryRandomPattern -q "path" -n $n -l $l -dom $d -o $INPUT
-				fi 
-
-				for alg in "${ALG_LIST[@]}"
+				for d in $((n / 10))
 				do
-					java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds >> "${OUT_PATH}path_n${n}_l${l}_d${d}_${alg}.out"
+					# Create the input if it doesn't exist
+					INPUT="${DATA_PATH}path_n${n}_l${l}_d${d}_i${i}.in"
+					if [ ! -f $INPUT ]; then
+						java -cp ${JAR_PATH} data.BinaryRandomPattern -q "path" -n $n -l $l -dom $d -o $INPUT
+					fi 
+
+					for alg in "${ALG_LIST[@]}"
+					do
+						java $OPTS -cp ${JAR_PATH} experiments.Path_Equijoin -a $alg -i $INPUT -n $n -l $l -dom $d -ds >> "${OUT_PATH}path_n${n}_l${l}_d${d}_${alg}.out"
+					done
 				done
 			done
-		done
-		echo "Done with n=${n}, l=${l}, d=${d}, run ${i}"
-done
+			echo "Done with n=${n}, l=${l}, d=${d}, run ${i}"
+	done
+fi

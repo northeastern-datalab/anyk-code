@@ -12,21 +12,25 @@ ALG_LIST=("Eager" "All" "Take2" "Lazy" "Recursive")
 
 for i in $(seq 1 $ITERS_TWITTER_CYCLE);
 do
-	l=4
-	# 87687 edges
-	k=876870 # 10n
-	for alg in "${ALG_LIST[@]}"
-	do
-		java $OPTS -cp ${JAR_PATH} experiments.SimpleCycle_Equijoin -a $alg -i "${DATA_PATH}${graph}.in" -sj -l $l -ds -k $k >> "${OUT_PATH}cycle_${graph}_l${l}_${alg}.out"
-	done
+	if [ "$LENGTH4" = true ] ; then
+		l=4
+		# 87687 edges
+		k=876870 # 10n
+		for alg in "${ALG_LIST[@]}"
+		do
+			java $OPTS -cp ${JAR_PATH} experiments.SimpleCycle_Equijoin -a $alg -i "${DATA_PATH}${graph}.in" -sj -l $l -ds -k $k >> "${OUT_PATH}cycle_${graph}_l${l}_${alg}.out"
+		done
+	fi
 	
-	l=6
-	# 87687 edges
-	k=876870 # 10n
-	for alg in "${ALG_LIST[@]}"
-	do
-		java $OPTS -cp ${JAR_PATH} experiments.SimpleCycle_Equijoin -a $alg -i "${DATA_PATH}${graph}.in" -sj -l $l -ds -k $k >> "${OUT_PATH}cycle_${graph}_l${l}_${alg}.out"
-	done	
+	if [ "$LENGTH6" = true ] ; then
+		l=6
+		# 87687 edges
+		k=876870 # 10n
+		for alg in "${ALG_LIST[@]}"
+		do
+			java $OPTS -cp ${JAR_PATH} experiments.SimpleCycle_Equijoin -a $alg -i "${DATA_PATH}${graph}.in" -sj -l $l -ds -k $k >> "${OUT_PATH}cycle_${graph}_l${l}_${alg}.out"
+		done	
+	fi
 
 	echo "Done with run ${i}"
 done
