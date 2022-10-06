@@ -7,8 +7,8 @@ MEM="-Xms100g -Xmx100g"
 # The flags below control which queries will be run. Only the length-4 queries are required to replicate
 # the figures of the VLDB20 paper
 LENGTH4=true
-LENGTH3=false
-LENGTH6=false
+#LENGTH3=true
+#LENGTH6=true
 
 # To run the experiments more quickly to see some preliminary results, simply uncomment the line below.
 # This will run them for only few iterations and will finish in a couple of hours.

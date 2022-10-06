@@ -1,9 +1,10 @@
 # Reproducibility of VLDB 2020 Experiments
 
-This page contains a detailed description to reproduce the experimental results reported 
+This page contains a detailed description on how to reproduce the experimental results reported 
 in the VLDB 2020 paper titled 
 [*Optimal Algorithms for Ranked Enumeration of Answers to Full Conjunctive Queries*](https://dl.acm.org/doi/abs/10.14778/3397230.3397250).
 
+The results have been [*reproduced by the VLDB Reproducibility Committee*](http://vldb.org/pvldb/reproducibility/).
 
 
 ## Research Paper
@@ -88,7 +89,9 @@ All that is automated by simply running `run_and_plot.sh` in the current directo
 ./run_and_plot.sh > execution.log 2>&1
 ```
 
-Running all the iterations required to minimize the variance and obtain the same figures as in the paper will take many days. To get some quick results (in a couple of hours), fewer iterations can be run simply by uncommenting a line in `execution_parameters.sh`. Also, consider using a tool like [screen](https://www.gnu.org/software/screen/) to let the process run in the background.
+Running all the iterations required to minimize the variance and obtain the same figures as in the paper will take many days. To get some quick results (in a couple of hours), fewer iterations can be run simply by uncommenting a line in `execution_parameters.sh` (`QUICK=true`). 
+By default, only the experiments for queries of size 4 will be run. To run for other query sizes, uncomment the appropriate lines in `execution_parameters.sh`.
+Also, consider using a tool like [screen](https://www.gnu.org/software/screen/) to let the process run in the background.
 
 In case you want to restart fresh after an error, you can navigate to either directory (`Synthetic_data/` or `Real_data/`) and run `./clean.sh`. This will wipe all inputs, outputs, and figures.
 
