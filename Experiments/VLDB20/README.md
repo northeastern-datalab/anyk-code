@@ -15,6 +15,15 @@ For citing our work, we suggest using the [DBLP bib file](https://dblp.uni-trier
 
 
 
+## Code Version
+We update the code frequently and future updates may interfere with the reproducibility of the experiments as they were conducted when the paper was written and reproduced by the VLDB committee. 
+To get the most accurate results, please use the following version: 
+```
+git checkout 714393358f92c0b3357c7ce8cf5fcb12b396091e
+```
+
+
+
 ## Programming Language and Dependencies
 The source code is written in Java, tested on version 8. To install it in a Debian/Ubuntu system, you can use:
 ```
