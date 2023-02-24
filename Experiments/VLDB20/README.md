@@ -32,7 +32,7 @@ sudo apt-get install openjdk-8-jdk
 export JAVA_HOME=path_to_java_home
 ```
 The project compiles with the [Maven](https://maven.apache.org/index.html) package manager.
-For plotting and dataset preprocessing, several scripts need a working version of Python 2. We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) to create an environment with all the required packages in [`../environment.yml`](https://github.com/northeastern-datalab/any-k-code/tree/master/Experiments/environment.yml):
+For plotting and dataset preprocessing, several scripts need a working version of Python 2. We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) to create an environment with all the required packages in [`../environment.yml`](/Experiments/environment.yml):
 ```
 conda env create -f ../environment.yml
 conda activate anyk_env

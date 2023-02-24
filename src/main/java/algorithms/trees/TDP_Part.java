@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import algorithms.Configuration;
 import entities.trees.TDP_Decision;
 import entities.trees.TDP_DecisionSet;
 import entities.trees.TDP_Prefix_Solution;
@@ -51,19 +52,14 @@ public abstract class TDP_Part extends TDP_Anyk_Iterator
 	 * By convention, latest_sidetrack_stage of the top-1 solution is 1.
 	*/	
 	protected int latest_sidetrack_stage;
-	/** 
-	 * Used to specify different implementations of {@link #global_pq}.
-	*/
-	protected String heap_type;
 
 	/** 
 	 * @param inst The T-DP problem to run any-k on.
-	 * @param heap_type A parameter that is used to select an implementation for the global PQ. 
-	 * 					By default (null), a binary heap is used.
+	 * @param conf A parameter that sets various parameters of the algorithm such as the PQ type.
 	*/
-	public TDP_Part(TDP_Problem_Instance inst, String heap_type)
+	public TDP_Part(TDP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst);
+    	super(inst, conf);
     	this.latest_solution = null;
 		this.latest_sidetrack_stage = -1;
 		// Choose a heap implementation
@@ -74,7 +70,6 @@ public abstract class TDP_Part extends TDP_Anyk_Iterator
 			else this.heap_type = "Lib_BHeap_Bulk";
 		}
 		*/
-		this.heap_type = heap_type;
 		// Just use a simple binary heap
 
     	// Initialize the global PQ with an empty prefix (that contains only the starting node)

@@ -72,34 +72,30 @@ public class Join_Predicate
         if (this.type.equals("E"))
         {
             str.append("Idx " + attr_idx_1 + " = Idx " + attr_idx_2 + " ");
-            if (parameter != 0) str.append(String.format("%+f\n", parameter));
-            str.append("\n");
+            if (parameter != 0) str.append(String.format("%+f", parameter));
         }
         else if (this.type.equals("IL"))
         {
             str.append("Idx " + attr_idx_1 + " < Idx " + attr_idx_2 + " ");
-            if (parameter != 0) str.append(String.format("%+f\n", parameter));
-            str.append("\n");
+            if (parameter != 0) str.append(String.format("%+f", parameter));
         }
         else if (this.type.equals("IG"))
         {
             str.append("Idx " + attr_idx_1 + " > Idx " + attr_idx_2 + " ");
-            if (parameter != 0) str.append(System.out.format("%+f\n", parameter));
-            str.append("\n");
+            if (parameter != 0) str.append(System.out.format("%+f", parameter));
         }
         else if (this.type.equals("N"))
         {
             str.append("Idx " + attr_idx_1 + " != Idx " + attr_idx_2 + " ");
-            if (parameter != 0) str.append(System.out.format("%+f\n", parameter));
-            str.append("\n");
+            if (parameter != 0) str.append(System.out.format("%+f", parameter));
         }
         else if (this.type.equals("B"))
         {
-            str.append("|Idx " + attr_idx_1 + " - Idx " + attr_idx_2 + "| < " + parameter + "\n");
+            str.append("|Idx " + attr_idx_1 + " - Idx " + attr_idx_2 + "| < " + parameter);
         }
         else
         {
-            str.append("Unknown Predicate\n");
+            str.append("UnknownPredicate");
         }
         return str.toString();
     }

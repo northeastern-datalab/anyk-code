@@ -21,7 +21,7 @@ public abstract class DP_Anyk_Iterator
     */
     public DP_Problem_Instance instance;
     /** 
-     * The DP problem to run any-k on.
+     * An object that contains various configuration parameters for the algorithm.
     */
     public Configuration conf;
     /** 

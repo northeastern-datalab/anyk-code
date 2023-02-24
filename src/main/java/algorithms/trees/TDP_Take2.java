@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 // import java.util.PriorityQueue;
 
+import algorithms.Configuration;
 import entities.trees.Star_Equijoin_Query;
 import entities.trees.TDP_Decision;
 import entities.trees.TDP_DecisionSet;
@@ -25,9 +26,9 @@ import entities.trees.TDP_Star_Equijoin_Instance;
 */
 public class TDP_Take2 extends TDP_Part
 {
-	public TDP_Take2(TDP_Problem_Instance inst, String heap_type)
+	public TDP_Take2(TDP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst, heap_type);
+    	super(inst, conf);
     }
     
     public void initialize_partial_order(TDP_DecisionSet decisions)

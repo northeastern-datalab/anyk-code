@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import algorithms.Configuration;
 import entities.trees.Star_Equijoin_Query;
 import entities.trees.TDP_Decision;
 import entities.trees.TDP_Problem_Instance;
@@ -39,9 +40,9 @@ public class Tree_Batch extends TDP_Anyk_Iterator
     */
     int current_index;
 
-	public Tree_Batch(TDP_Problem_Instance inst)
+	public Tree_Batch(TDP_Problem_Instance inst, Configuration conf)
     {
-        super(inst);
+        super(inst, conf);
         this.all_solutions = new ArrayList<Tree_Query_Solution>();
         find_all_solutions();
         this.current_index = -1;
@@ -98,7 +99,7 @@ public class Tree_Batch extends TDP_Anyk_Iterator
         Star_Equijoin_Query example_query = new Star_Equijoin_Query();
         TDP_Star_Equijoin_Instance instance = new TDP_Star_Equijoin_Instance(example_query);
         instance.bottom_up();
-        TDP_Anyk_Iterator iter = new Tree_BatchSorting(instance);
+        TDP_Anyk_Iterator iter = new Tree_BatchSorting(instance, null);
         
         System.out.println("All solutions:");
         TDP_Solution sol;

@@ -185,6 +185,24 @@ public class DP_Path_ThetaJoin_Instance extends DP_Problem_Instance
                 }
             }
 
+            // Print new relation sizes
+            /*
+            if (method != null && method.equals("binary_part"))
+            {
+                System.out.println("Initial Relation Size = " + new_stage.size());
+
+                int fact_rel_1_size = 0;
+                for (DP_State_Node left_node : new_stage) fact_rel_1_size += left_node.get_number_of_children();
+                System.out.println("New Relation 1 Size = " + fact_rel_1_size);
+
+                int fact_rel_2_size = 0;
+                HashSet<DP_State_Node> fact_rel_1_nodes = new HashSet<DP_State_Node>();  
+                for (DP_State_Node left_node : new_stage) fact_rel_1_nodes.addAll(left_node.get_children());
+                for (DP_State_Node fact_rel_1_node : fact_rel_1_nodes) fact_rel_2_size += fact_rel_1_node.get_number_of_children();
+                System.out.println("New Relation 2 Size = " + fact_rel_2_size);
+            }
+            */
+
             // Remove dangling nodes
             new_stage.removeIf(node -> node.get_number_of_children() == 0);
         }

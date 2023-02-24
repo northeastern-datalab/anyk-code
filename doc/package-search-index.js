@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"algorithms"},{"l":"algorithms.cycles"},{"l":"algorithms.paths"},{"l":"algorithms.trees"},{"l":"All Packages","url":"allpackages-index.html"},{"l":"data"},{"l":"entities"},{"l":"entities.cycles"},{"l":"entities.paths"},{"l":"entities.trees"},{"l":"experiments"},{"l":"factorization"},{"l":"util"}]

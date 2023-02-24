@@ -22,11 +22,11 @@ import java.util.Stack;
  * This is an abstract class that captures all DP problems.
  * An implementing subclass has to do the following in its constuctor: 
  * <ul>
- * <li>Instantiate nodes as {@link entities.paths.DP_State_Node} objects.
- * <li>Set a single node as {@link #starting_node}.
- * <li>Set a number of nodes as terminals (those that belong to the last stage) 
- * with @link{entities.paths.DP_State_Node#set_to_terminal}.
- * <li>Instantiate weighted edges between them as {@link entities.paths.DP_Decision}.
+ * <li>Instantiate nodes as {@link entities.paths.DP_State_Node} objects.</li>
+ * <li>Set a single node as {@link #starting_node}.</li>
+ * <li>Set a number of nodes as terminals (those that belong to the last stage)
+ * with @link{entities.paths.DP_State_Node#set_to_terminal}.</li>
+ * <li>Instantiate weighted edges between them as {@link entities.paths.DP_Decision}.</li>
  * </ul>
  * The {@link #bottom_up} method computes the minimum achievable weight per state/node.
  * By default, it works recursively, but can be specified to work iteratively with {@link #set_bottom_up_implementation}.

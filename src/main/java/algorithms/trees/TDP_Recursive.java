@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import algorithms.Configuration;
 import entities.trees.TDP_Decision;
 import entities.trees.TDP_DecisionSet;
 import entities.trees.TDP_Problem_Instance;
@@ -41,9 +42,9 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
 {
     private TDP_Subtree_Solution latest_solution;
 
-    public TDP_Recursive(TDP_Problem_Instance inst)
+    public TDP_Recursive(TDP_Problem_Instance inst, Configuration conf)
     {
-        super(inst);
+        super(inst, conf);
         this.latest_solution = null;
     }
 

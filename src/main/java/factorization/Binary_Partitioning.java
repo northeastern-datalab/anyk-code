@@ -36,15 +36,17 @@ public class Binary_Partitioning
         rec_step_id = 0;
         // First take care of the equalities that precede all the other conditions
         List<Join_Predicate> equalities = null, rest = null; 
-        for(int eq_idx = 0; eq_idx < ps.size(); eq_idx++) 
+        int eq_idx = 0;
+        for(eq_idx = 0; eq_idx < ps.size(); eq_idx++)
         {
-            if (!ps.get(eq_idx).type.equals("E")) 
+            if (!ps.get(eq_idx).type.equals("E"))
             {
-                equalities = ps.subList(0, eq_idx);
-                rest = ps.subList(eq_idx, ps.size());
                 break;
             }
         }
+        equalities = ps.subList(0, eq_idx);
+        rest = ps.subList(eq_idx, ps.size());
+        
         for (Pair<List<DP_State_Node>,List<DP_State_Node>> equality_partition : 
                 Equality.split_by_equality(left, right, equalities))
         {

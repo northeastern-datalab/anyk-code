@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import algorithms.Configuration;
 import entities.trees.TDP_Decision;
 import entities.trees.TDP_DecisionSet;
 import entities.trees.TDP_Problem_Instance;
@@ -17,9 +18,9 @@ import entities.trees.TDP_Problem_Instance;
 */
 public class TDP_Eager extends TDP_Part
 {
-	public TDP_Eager(TDP_Problem_Instance inst, String heap_type)
+	public TDP_Eager(TDP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst, heap_type);
+    	super(inst, conf);
     }
     
     // Called before the enumeration begins on each node of the Dp graph

@@ -10,6 +10,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import algorithms.Configuration;
 import algorithms.trees.TDP_All;
 import algorithms.trees.TDP_Anyk_Iterator;
 import algorithms.trees.TDP_Eager;
@@ -144,9 +145,8 @@ public class BinaryStar_Equijoin
             sample_rate = (int) Math.ceil(estimated_result_size / 500.0); 
         }
         else sample_rate = 1;
-        String heap_type;
-        if (cmd.hasOption("heap type")) heap_type = cmd.getOptionValue("heap type");
-        else heap_type = null;   // let the classes choose by themselves
+        Configuration conf = new Configuration();
+        if (cmd.hasOption("heap type")) conf.set_heap_type(cmd.getOptionValue("heap type"));
 
 
 
@@ -212,13 +212,13 @@ public class BinaryStar_Equijoin
 
         TDP_Anyk_Iterator iter = null;
         // Run any-k
-        if (algorithm.equals("Eager")) iter = new TDP_Eager(instance, heap_type);
-        else if (algorithm.equals("All")) iter = new TDP_All(instance, heap_type);
-        else if (algorithm.equals("Take2")) iter = new TDP_Take2(instance, heap_type);
-        else if (algorithm.equals("Lazy")) iter = new TDP_Lazy(instance, heap_type);
-        else if (algorithm.equals("Recursive")) iter = new TDP_Recursive(instance);
-        else if (algorithm.equals("BatchSorting")) iter = new Tree_BatchSorting(instance);
-        else if (algorithm.equals("Batch")) iter = new Tree_Batch(instance);
+        if (algorithm.equals("Eager")) iter = new TDP_Eager(instance, conf);
+        else if (algorithm.equals("All")) iter = new TDP_All(instance, conf);
+        else if (algorithm.equals("Take2")) iter = new TDP_Take2(instance, conf);
+        else if (algorithm.equals("Lazy")) iter = new TDP_Lazy(instance, conf);
+        else if (algorithm.equals("Recursive")) iter = new TDP_Recursive(instance, conf);
+        else if (algorithm.equals("BatchSorting")) iter = new Tree_BatchSorting(instance, conf);
+        else if (algorithm.equals("Batch")) iter = new Tree_Batch(instance, conf);
         else
         {
         	System.err.println("Any-k algorithm not recognized.");

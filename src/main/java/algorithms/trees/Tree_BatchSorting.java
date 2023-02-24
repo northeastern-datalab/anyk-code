@@ -2,6 +2,7 @@ package algorithms.trees;
 
 import java.util.Collections;
 
+import algorithms.Configuration;
 import entities.trees.Star_Equijoin_Query;
 import entities.trees.TDP_Problem_Instance;
 import entities.trees.TDP_Solution;
@@ -25,9 +26,9 @@ import entities.trees.TDP_Star_Equijoin_Instance;
 */
 public class Tree_BatchSorting extends Tree_Batch
 {
-	public Tree_BatchSorting(TDP_Problem_Instance inst)
+	public Tree_BatchSorting(TDP_Problem_Instance inst, Configuration conf)
     {
-        super(inst);
+        super(inst, conf);
         // The superclass Tree_Batch stores all solutions in all_solutions list but does not sort them
         Collections.sort(all_solutions);
     }
@@ -38,7 +39,7 @@ public class Tree_BatchSorting extends Tree_Batch
         Star_Equijoin_Query example_query = new Star_Equijoin_Query();
         TDP_Star_Equijoin_Instance instance = new TDP_Star_Equijoin_Instance(example_query);
         instance.bottom_up();
-        TDP_Anyk_Iterator iter = new Tree_BatchSorting(instance);
+        TDP_Anyk_Iterator iter = new Tree_BatchSorting(instance, null);
         
         System.out.println("All solutions:");
         TDP_Solution sol;

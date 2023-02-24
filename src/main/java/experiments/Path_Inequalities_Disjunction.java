@@ -226,134 +226,141 @@ public class Path_Inequalities_Disjunction
         DP_Anyk_Iterator iter = null;
         Measurements measurements = null;
 
-        if (algorithm.equals("Count"))
+        try 
         {
-            query = query_QT1D_no_duplicates(database);
-            // Now run counting as usual
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            System.out.println("Number_of_Results = " + instance.count_solutions());
-            return;
-        }
-        else if (algorithm.equals("Mem"))
-        {
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            System.out.println("Graph_size = " + instance.graph_size());
-            return;
-        }
-        else if (algorithm.equals("BatchSorting"))
-        {
-            query = query_QT1D_no_duplicates(database);
-            long startTime = System.nanoTime();
-            // Before starting the real clock, compute the entire result set
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            Path_Batch batch = new Path_Batch(instance, conf);
-            // Remove duplicates
-            batch.all_solutions = new ArrayList<Path_Query_Solution>(new LinkedHashSet<Path_Query_Solution>(batch.all_solutions));
-            double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
-            // Now start the real clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Time the sorting of the results
-            iter = new Path_BatchSorting(batch);
-        }
-        else if (algorithm.equals("BatchHeap"))
-        {
-            query = query_QT1D_no_duplicates(database);
-            long startTime = System.nanoTime();
-            // Before starting the real clock, compute the entire result set
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            Path_Batch batch = new Path_Batch(instance, conf);
-            // Remove duplicates
-            batch.all_solutions = new ArrayList<Path_Query_Solution>(new LinkedHashSet<Path_Query_Solution>(batch.all_solutions));
-            double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
-            // Now start the real clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Time the construction of the PQ
-            iter = new Path_BatchHeap(batch);
-        }
-        else if (algorithm.startsWith("QEq_"))
-        {
-            query = query_QT1D_no_duplicates(database);
-            long startTime = System.nanoTime();
-            // Before starting the clock, transform the query into a quadratic equijoin
-            Path_Equijoin_Query quadratic_equijoin = query.to_Quadratic_Equijoin_with_duplicate_filter();
-
-            double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.println("Not measured time for creating the quadratic relations: " + elapsedTime + " sec");
-            // Now start thereal clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Time the bottom-up phase of the new equijoin
-            instance = new DP_Path_Equijoin_Instance(quadratic_equijoin);
-            instance.bottom_up();
-
-            if (algorithm.endsWith("Eager")) iter = new DP_Eager(instance, conf);
-            else if (algorithm.endsWith("All")) iter = new DP_All(instance, conf);
-            else if (algorithm.endsWith("Take2")) iter = new DP_Take2(instance, conf);
-            else if (algorithm.endsWith("Lazy")) iter = new DP_Lazy(instance, conf);
-            else if (algorithm.endsWith("Recursive")) iter = new DP_Recursive(instance, conf);
-            else if (algorithm.endsWith("BatchSorting")) iter = new Path_BatchSorting(instance, conf);         
-            else
+            if (algorithm.equals("Count"))
             {
-                System.err.println("Any-k algorithm not recognized.");
-                System.exit(1);
+                query = query_QT1D_no_duplicates(database);
+                // Now run counting as usual
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                System.out.println("Number_of_Results = " + instance.count_solutions());
+                return;
             }
-        }
-        else
-        {
-            // Start the clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Run any-k on the theta-join query
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            instance.bottom_up();
-
-            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
-            else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
-            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
-            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
-            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);       
-            else
+            else if (algorithm.equals("Mem"))
             {
-                System.err.println("Any-k algorithm not recognized.");
-                System.exit(1);
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                System.out.println("Graph_size = " + instance.graph_size());
+                return;
             }
-
-            // For any-k, filter the duplicates on-the-fly
-            DP_Solution solution;
-            double prev_cost = Double.MIN_VALUE;
-            HashSet<DP_Solution> hash = new HashSet<DP_Solution>(4);
-            int total_iter_results = 0;
-            int k;
-            for (k = 1; k <= max_k; k++)
+            else if (algorithm.equals("BatchSorting"))
             {
-                do 
+                query = query_QT1D_no_duplicates(database);
+                long startTime = System.nanoTime();
+                // Before starting the real clock, compute the entire result set
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                Path_Batch batch = new Path_Batch(instance, conf);
+                // Remove duplicates
+                batch.all_solutions = new ArrayList<Path_Query_Solution>(new LinkedHashSet<Path_Query_Solution>(batch.all_solutions));
+                double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
+                System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
+                // Now start the real clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Time the sorting of the results
+                iter = new Path_BatchSorting(batch);
+            }
+            else if (algorithm.equals("BatchHeap"))
+            {
+                query = query_QT1D_no_duplicates(database);
+                long startTime = System.nanoTime();
+                // Before starting the real clock, compute the entire result set
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                Path_Batch batch = new Path_Batch(instance, conf);
+                // Remove duplicates
+                batch.all_solutions = new ArrayList<Path_Query_Solution>(new LinkedHashSet<Path_Query_Solution>(batch.all_solutions));
+                double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
+                System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
+                // Now start the real clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Time the construction of the PQ
+                iter = new Path_BatchHeap(batch);
+            }
+            else if (algorithm.startsWith("QEq_"))
+            {
+                query = query_QT1D_no_duplicates(database);
+                long startTime = System.nanoTime();
+                // Before starting the clock, transform the query into a quadratic equijoin
+                Path_Equijoin_Query quadratic_equijoin = query.to_Quadratic_Equijoin_with_duplicate_filter();
+
+                double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
+                System.out.println("Not measured time for creating the quadratic relations: " + elapsedTime + " sec");
+                // Now start thereal clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Time the bottom-up phase of the new equijoin
+                instance = new DP_Path_Equijoin_Instance(quadratic_equijoin);
+                instance.bottom_up();
+
+                if (algorithm.endsWith("Eager")) iter = new DP_Eager(instance, conf);
+                else if (algorithm.endsWith("All")) iter = new DP_All(instance, conf);
+                else if (algorithm.endsWith("Take2")) iter = new DP_Take2(instance, conf);
+                else if (algorithm.endsWith("Lazy")) iter = new DP_Lazy(instance, conf);
+                else if (algorithm.endsWith("Recursive")) iter = new DP_Recursive(instance, conf);
+                else if (algorithm.endsWith("BatchSorting")) iter = new Path_BatchSorting(instance, conf);         
+                else
                 {
-                    solution = iter.get_next();
-                    total_iter_results += 1;
+                    System.err.println("Any-k algorithm not recognized.");
+                    System.exit(1);
                 }
-                while (solution != null && hash.contains(solution));
+            }
+            else
+            {
+                // Start the clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Run any-k on the theta-join query
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                instance.bottom_up();
+
+                if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
+                else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
+                else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
+                else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
+                else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);       
+                else
+                {
+                    System.err.println("Any-k algorithm not recognized.");
+                    System.exit(1);
+                }
+
+                // For any-k, filter the duplicates on-the-fly
+                DP_Solution solution;
+                double prev_cost = Double.MIN_VALUE;
+                HashSet<DP_Solution> hash = new HashSet<DP_Solution>(4);
+                int total_iter_results = 0;
+                int k;
+                for (k = 1; k <= max_k; k++)
+                {
+                    do 
+                    {
+                        solution = iter.get_next();
+                        total_iter_results += 1;
+                    }
+                    while (solution != null && hash.contains(solution));
+                    if (solution == null) break;
+                    if (solution.get_cost() > prev_cost + Double.MIN_NORMAL) hash = new HashSet<DP_Solution>(4);
+                    prev_cost = solution.get_cost();
+                    hash.add(solution);
+                    measurements.add_k(solution.solutionToTuples());
+                }
+                // Finalize and print everyting 
+                measurements.print();    
+                int duplicates_filtered = total_iter_results - k - 1;
+                System.out.println("Duplicates filtered = " + duplicates_filtered);
+                return;        
+            }
+
+            // Batch and QEq execute enumeration here without filtering
+            DP_Solution solution;
+            for (int k = 1; k <= max_k; k++)
+            {
+                solution = iter.get_next();
                 if (solution == null) break;
-                if (solution.get_cost() > prev_cost + Double.MIN_NORMAL) hash = new HashSet<DP_Solution>(4);
-                prev_cost = solution.get_cost();
-                hash.add(solution);
-                measurements.add_k(solution.solutionToTuples());
+                else measurements.add_k(solution.solutionToTuples());
             }
             // Finalize and print everyting 
-            measurements.print();    
-            int duplicates_filtered = total_iter_results - k - 1;
-            System.out.println("Duplicates filtered = " + duplicates_filtered);
-            return;        
+            measurements.print();
         }
-
-        // Batch and QEq execute enumeration here without filtering
-        DP_Solution solution;
-        for (int k = 1; k <= max_k; k++)
+        catch (OutOfMemoryError oome) 
         {
-            solution = iter.get_next();
-            if (solution == null) break;
-            else measurements.add_k(solution.solutionToTuples());
+            System.out.println("JVM run out of memory!");
         }
-        // Finalize and print everyting 
-        measurements.print();
     }
 }

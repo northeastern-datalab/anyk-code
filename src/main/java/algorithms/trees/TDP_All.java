@@ -3,6 +3,7 @@ package algorithms.trees;
 import java.util.ArrayList;
 import java.util.List;
 
+import algorithms.Configuration;
 import entities.trees.Star_Equijoin_Query;
 import entities.trees.TDP_Decision;
 import entities.trees.TDP_DecisionSet;
@@ -22,9 +23,9 @@ import entities.trees.TDP_Star_Equijoin_Instance;
 */
 public class TDP_All extends TDP_Part
 {
-	public TDP_All(TDP_Problem_Instance inst, String heap_type)
+	public TDP_All(TDP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst, heap_type);
+    	super(inst, conf);
     }
 
     // Called before the enumeration begins on each node of the DP graph

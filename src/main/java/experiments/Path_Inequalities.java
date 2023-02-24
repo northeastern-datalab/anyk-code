@@ -244,143 +244,150 @@ public class Path_Inequalities
         DP_Anyk_Iterator iter = null;
         Measurements measurements = null;
 
-        if (algorithm.equals("Count"))
+        try 
         {
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            System.out.println("Number_of_Results = " + instance.count_solutions());
-            return;
-        }
-        else if (algorithm.equals("Mem"))
-        {
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            System.out.println("Graph_size = " + instance.graph_size());
-            return;
-        }
-        else if (algorithm.equals("BatchSorting"))
-        {
-            long startTime = System.nanoTime();
-            // Before starting the real clock, compute the entire result set
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            Path_Batch batch = new Path_Batch(instance, conf);
-            double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
-            // Now start the real clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Time the sorting of the results
-            iter = new Path_BatchSorting(batch);
-        }
-        else if (algorithm.equals("BatchHeap"))
-        {
-            long startTime = System.nanoTime();
-            // Before starting the real clock, compute the entire result set
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            Path_Batch batch = new Path_Batch(instance, conf);
-            double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
-            // Now start the real clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Time the construction of the PQ
-            iter = new Path_BatchHeap(batch);
-        }
-        else if (algorithm.startsWith("QEq_"))
-        {
-            long startTime = System.nanoTime();
-            // Special case: if the new query only has 1 relation, 
-            // then just use a PQ instead of running any-k DP
-            if (query.length == 2)
+            if (algorithm.equals("Count"))
             {
-                // Before starting the real clock, compute the quadratic relations
-                DP_Solution sol;
-                // To avoid consuming more memory return the DP solutions of batch
-                // instead of materializing a new relation
-                DP_Path_ThetaJoin_Instance binary_dp_instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-                Path_Batch batch_alg = new Path_Batch(binary_dp_instance, conf);
-                // The solutions have been computed
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                System.out.println("Number_of_Results = " + instance.count_solutions());
+                return;
+            }
+            else if (algorithm.equals("Mem"))
+            {
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                System.out.println("Graph_size = " + instance.graph_size());
+                return;
+            }
+            else if (algorithm.equals("BatchSorting"))
+            {
+                long startTime = System.nanoTime();
+                // Before starting the real clock, compute the entire result set
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                Path_Batch batch = new Path_Batch(instance, conf);
                 double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-                System.out.println("Not measured time for creating the quadratic relations: " + elapsedTime + " sec");
+                System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
                 // Now start the real clock
                 measurements = new Measurements(sample_rate, max_k);
-                PriorityQueue<DP_Solution> pq = new PriorityQueue<DP_Solution>(batch_alg.all_solutions);
+                // Time the sorting of the results
+                iter = new Path_BatchSorting(batch);
+            }
+            else if (algorithm.equals("BatchHeap"))
+            {
+                long startTime = System.nanoTime();
+                // Before starting the real clock, compute the entire result set
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                Path_Batch batch = new Path_Batch(instance, conf);
+                double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
+                System.out.println("Not measured time for creating the query results: " + elapsedTime + " sec");
+                // Now start the real clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Time the construction of the PQ
+                iter = new Path_BatchHeap(batch);
+            }
+            else if (algorithm.startsWith("QEq_"))
+            {
+                long startTime = System.nanoTime();
+                // Special case: if the new query only has 1 relation, 
+                // then just use a PQ instead of running any-k DP
+                if (query.length == 2)
+                {
+                    // Before starting the real clock, compute the quadratic relations
+                    DP_Solution sol;
+                    // To avoid consuming more memory return the DP solutions of batch
+                    // instead of materializing a new relation
+                    DP_Path_ThetaJoin_Instance binary_dp_instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                    Path_Batch batch_alg = new Path_Batch(binary_dp_instance, conf);
+                    // The solutions have been computed
+                    double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
+                    System.out.println("Not measured time for creating the quadratic relations: " + elapsedTime + " sec");
+                    // Now start the real clock
+                    measurements = new Measurements(sample_rate, max_k);
+                    PriorityQueue<DP_Solution> pq = new PriorityQueue<DP_Solution>(batch_alg.all_solutions);
+                    for (int k = 1; k <= max_k; k++)
+                    {
+                        sol = pq.poll();
+                        if (sol == null) break;
+                        else measurements.add_k(sol.solutionToTuples());
+                    }
+                    // Finalize and print everyting 
+                    measurements.print();
+                    return;
+                }
+                // Otherwise run any-k DP normally
+                // Before starting the clock, transform the query into a quadratic equijoin
+                Path_Equijoin_Query quadratic_equijoin = query.to_Quadratic_Equijoin();
+
+                double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
+                System.out.println("Not measured time for creating the quadratic relations: " + elapsedTime + " sec");
+                // Now start thereal clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Time the bottom-up phase of the new equijoin
+                instance = new DP_Path_Equijoin_Instance(quadratic_equijoin);
+                instance.bottom_up();
+
+                if (algorithm.endsWith("Eager")) iter = new DP_Eager(instance, conf);
+                else if (algorithm.endsWith("All")) iter = new DP_All(instance, conf);
+                else if (algorithm.endsWith("Take2")) iter = new DP_Take2(instance, conf);
+                else if (algorithm.endsWith("Lazy")) iter = new DP_Lazy(instance, conf);
+                else if (algorithm.endsWith("Recursive")) iter = new DP_Recursive(instance, conf);
+                else if (algorithm.endsWith("BatchSorting")) iter = new Path_BatchSorting(instance, conf);         
+                else
+                {
+                    System.err.println("Any-k algorithm not recognized.");
+                    System.exit(1);
+                }
+            }
+            else if (algorithm.equals("UnrankedEnum"))
+            {
+                // Start the clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Run unranked enumeration on the theta-join query
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
+                DP_Solution solution;
                 for (int k = 1; k <= max_k; k++)
                 {
-                    sol = pq.poll();
-                    if (sol == null) break;
-                    else measurements.add_k(sol.solutionToTuples());
+                    solution = iter_unranked.get_next();
+                    if (solution == null) break;
+                    else measurements.add_k(solution.solutionToTuples());
                 }
                 // Finalize and print everyting 
                 measurements.print();
                 return;
             }
-            // Otherwise run any-k DP normally
-            // Before starting the clock, transform the query into a quadratic equijoin
-            Path_Equijoin_Query quadratic_equijoin = query.to_Quadratic_Equijoin();
-
-            double elapsedTime = (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.println("Not measured time for creating the quadratic relations: " + elapsedTime + " sec");
-            // Now start thereal clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Time the bottom-up phase of the new equijoin
-            instance = new DP_Path_Equijoin_Instance(quadratic_equijoin);
-            instance.bottom_up();
-
-            if (algorithm.endsWith("Eager")) iter = new DP_Eager(instance, conf);
-            else if (algorithm.endsWith("All")) iter = new DP_All(instance, conf);
-            else if (algorithm.endsWith("Take2")) iter = new DP_Take2(instance, conf);
-            else if (algorithm.endsWith("Lazy")) iter = new DP_Lazy(instance, conf);
-            else if (algorithm.endsWith("Recursive")) iter = new DP_Recursive(instance, conf);
-            else if (algorithm.endsWith("BatchSorting")) iter = new Path_BatchSorting(instance, conf);         
             else
             {
-                System.err.println("Any-k algorithm not recognized.");
-                System.exit(1);
+                // Start the clock
+                measurements = new Measurements(sample_rate, max_k);
+                // Run any-k on the theta-join query
+                instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
+                instance.bottom_up();
+
+                if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
+                else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
+                else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
+                else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
+                else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);       
+                else
+                {
+                    System.err.println("Any-k algorithm not recognized.");
+                    System.exit(1);
+                }
             }
-        }
-        else if (algorithm.equals("UnrankedEnum"))
-        {
-            // Start the clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Run unranked enumeration on the theta-join query
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
+
             DP_Solution solution;
             for (int k = 1; k <= max_k; k++)
             {
-                solution = iter_unranked.get_next();
+                solution = iter.get_next();
                 if (solution == null) break;
                 else measurements.add_k(solution.solutionToTuples());
             }
             // Finalize and print everyting 
             measurements.print();
-            return;
         }
-        else
+        catch (OutOfMemoryError oome) 
         {
-            // Start the clock
-            measurements = new Measurements(sample_rate, max_k);
-            // Run any-k on the theta-join query
-            instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-            instance.bottom_up();
-
-            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
-            else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
-            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
-            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
-            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);       
-            else
-            {
-                System.err.println("Any-k algorithm not recognized.");
-                System.exit(1);
-            }
+            System.out.println("JVM run out of memory!");
         }
-
-        DP_Solution solution;
-        for (int k = 1; k <= max_k; k++)
-        {
-            solution = iter.get_next();
-            if (solution == null) break;
-            else measurements.add_k(solution.solutionToTuples());
-        }
-        // Finalize and print everyting 
-        measurements.print();
     }
 }

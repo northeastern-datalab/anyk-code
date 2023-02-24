@@ -8,18 +8,17 @@
 
 
 
-This project provides an implementation of the any-k framework for ranked enumeration of the answers to a join query over a relational database.
+This repo provides an implementation of the any-k framework for ranked enumeration of the answers to a join query over a relational database.
 More generally, the code can easily be extended to obtain ranked enumeration for any problem solvable via Dynamic Programming.
-Also included are scripts to reproduce the experiments from our [VLDB 2020](https://vldb2020.org/) paper:
+Also included are scripts to reproduce the experiments from our VLDB 2020 and VLDB 2021 papers:
 [*Optimal Algorithms for Ranked Enumeration of Answers to Full Conjunctive Queries*](https://dl.acm.org/doi/abs/10.14778/3397230.3397250)
-and a preprint:
-[*Beyond Equi-joins: Ranking, Enumeration and Factorization*](https://arxiv.org/abs/2101.12158)
-that extends our techniques to general theta-joins.
+and
+[*Beyond Equi-joins: Ranking, Enumeration and Factorization*](https://dl.acm.org/doi/10.14778/3476249.3476306).
 
 
 **Overview of Any-k:** 
-Given a relational database with weighted tuples, a join query and a ranking function, ranked enumeration returns the query answers incrementally in the order of their importance, specified by the ranking function.
-For a quick understanding of the approach, please also see the video presented at VLDB 2020:
+Given a relational database with weighted tuples, a join query, and a ranking function, ranked enumeration returns the query answers incrementally in the order of their importance, specified by the ranking function.
+For more information, please visit the [project website](https://northeastern-datalab.github.io/anyk/). You can also watch the video presented at VLDB 2020:
 
 [![Watch the video](https://img.youtube.com/vi/nw4XiaOnavE/0.jpg)](https://www.youtube.com/watch?v=nw4XiaOnavE&list=PL_72ERGKF6DR4R0Cowx-LnnnqLXRf4ZjB)
 
@@ -27,16 +26,20 @@ or the third part of our [SIGMOD 2020 tutorial](https://northeastern-datalab.git
 
 [![Watch the video](https://img.youtube.com/vi/epvkyXBWefs/0.jpg)](https://www.youtube.com/watch?list=PL_72ERGKF6DTTD6T5oR4WQPuCyHZd7x_N&v=epvkyXBWefs)
 
+or the sixth part of our [ICDE 2022 tutorial](https://northeastern-datalab.github.io/responsive-dbms-tutorial/):
+
+[![Watch the video](https://img.youtube.com/vi/ao7kXi55Y94/0.jpg)](https://www.youtube.com/watch?v=ao7kXi55Y94&list=PL_72ERGKF6DTInW_P3a9zTYPSNLwbqOAx&ab_channel=DATALabNortheastern)
+
 
 ## Programming Language and Dependencies
-The source code is written in Java, tested on version 8. To install it in a Debian/Ubuntu system, you can use:
+The source code is written in Java. The current version is tested on version 8. To install it in a Debian/Ubuntu system, you can use:
 ```
 sudo apt-get update
 sudo apt-get install openjdk-8-jdk
 export JAVA_HOME=path_to_java_home
 ```
 The project compiles with the [Maven](https://maven.apache.org/index.html) package manager.
-To run the bundled experiments, several scripts need a working version of Python 2. We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) to create an environment with all the required packages in [`Experiments/environment.yml`](https://github.com/northeastern-datalab/any-k-code/tree/master/Experiments/environment.yml):
+To run the bundled experiments, several scripts need a working version of Python 2. We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) to create an environment with all the required packages in [`Experiments/environment.yml`](/Experiments/environment.yml):
 ```
 conda env create -f Experiments/environment.yml
 conda activate anyk_env
@@ -56,14 +59,16 @@ To compile, navigate to the root directory of the project and run:
 ```
 mvn package
 ```
-Successful comilation will produce a jar file in `/target/` from which classes that implement a `main` function can be executed, e.g.
+Successful comilation will produce a jar file in `/target/` from which classes that implement a `main` function can be executed, e.g.,
 ```
 java -cp target/any-k-1.0.jar entities.paths.DP_Path_Equijoin_Instance
 ```
 
 
 ## Reproducibility of Experiments
-[Experiments/VLDB20/README.md](https://github.com/northeastern-datalab/anyk-code/blob/master/Experiments/VLDB20/README.md) contains a detailed description of how to reproduce the experimental results reported in the VLDB 2020 paper.
+The repository contains detailed description for reproducing the experimental results reported in our research papers:
+- VLDB 2020 : see [Experiments/VLDB20/README.md](/Experiments/VLDB20/README.md)
+- VLDB 2021 : see [Experiments/VLDB21/README.md](/Experiments/VLDB21/README.md)
 
 
 ## Running on your own Data
@@ -107,8 +112,7 @@ java -cp target/any-k-1.0.jar experiments.Path_Equijoin -a Lazy -i example.in -n
 Execute the class without parameters to get a list of the possible options.
 
 #### Note
-Setting the algorithm to UnrankedEnum in the command line arguments of experiments.Path_Equijoin will run an unranked enumeration algorithm on the instance. See the example in [src/main/java/experiments/Path_Unranked.java](https://github.com/northeastern-datalab/anyk-code/blob/master/src/main/java/experiments/Path_Unranked.java).
-
+Setting the algorithm to UnrankedEnum in the command line arguments of experiments.Path_Equijoin will run an unranked enumeration algorithm on the instance. See the example in [src/main/java/experiments/Binary_Join_Unranked.java](src/main/java/experiments/Binary_Join_Unranked.java).
 
 ## License
 Licensed under the Apache License, Version 2.0 (the "License");

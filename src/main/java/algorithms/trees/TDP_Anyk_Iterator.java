@@ -1,5 +1,6 @@
 package algorithms.trees;
 
+import algorithms.Configuration;
 import entities.trees.TDP_Problem_Instance;
 import entities.trees.TDP_Solution;
 
@@ -19,6 +20,10 @@ public abstract class TDP_Anyk_Iterator
      * The T-DP problem to run any-k on.
     */
 	TDP_Problem_Instance instance; 
+    /** 
+     * An object that contains various configuration parameters for the algorithm.
+    */
+    public Configuration conf;
     /** 
      * The number of stages of the TDP problem (partitions of states organized in a tree).
     */
@@ -45,10 +50,11 @@ public abstract class TDP_Anyk_Iterator
 	}
 
     // Initializes the iterator
-	public TDP_Anyk_Iterator(TDP_Problem_Instance inst)
+	public TDP_Anyk_Iterator(TDP_Problem_Instance inst, Configuration conf)
     {
     	this.instance = inst;
     	this.stages_no = inst.stages_no;
+        this.conf = conf;
     }
 
 	/** 

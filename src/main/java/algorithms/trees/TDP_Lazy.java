@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import algorithms.Configuration;
 import entities.trees.TDP_Decision;
 import entities.trees.TDP_DecisionSet;
 import entities.trees.TDP_Problem_Instance;
@@ -19,9 +20,9 @@ import entities.trees.TDP_Problem_Instance;
 */
 public class TDP_Lazy extends TDP_Part
 {
-	public TDP_Lazy(TDP_Problem_Instance inst, String heap_type)
+	public TDP_Lazy(TDP_Problem_Instance inst, Configuration conf)
     {
-    	super(inst, heap_type);
+    	super(inst, conf);
     }
     
     public void initialize_partial_order(TDP_DecisionSet decisions)

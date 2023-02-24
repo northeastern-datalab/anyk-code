@@ -1,0 +1,11 @@
+#Ignoring git and cache folders
+.git
+.cache
+
+doc
+**/*.out
+**/*.in
+**/*.tsv
+**/*.csv
+**/*.png
+**/*.pdf
