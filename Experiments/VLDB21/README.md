@@ -4,12 +4,22 @@ This page contains a detailed description on how to reproduce the experimental r
 in the VLDB 2021 paper titled 
 [*Beyond Equi-joins: Ranking, Enumeration and Factorization*](https://dl.acm.org/doi/abs/10.14778/3476249.3476306).
 
+The results have been [*reproduced by the VLDB Reproducibility Committee*](http://vldb.org/pvldb/reproducibility/).
+
 
 ## Research Paper
 The official paper is available by
 [VLDB (http://www.vldb.org/pvldb/vol14/p2599-tziavelis.pdf)](http://www.vldb.org/pvldb/vol14/p2599-tziavelis.pdf). 
 The full version is available on [arXiV.2101.12158](https://arxiv.org/abs/2101.12158). 
 For citing our work, we suggest using the [DBLP bib file](https://dblp.uni-trier.de/rec/bibtex/journals/pvldb/TziavelisGR21).
+
+
+## Code Version
+We update the code frequently and future updates may interfere with the reproducibility of the experiments as they were conducted when the paper was written and reproduced by the VLDB committee. 
+To get the most accurate results, please use the following version: 
+```
+git checkout 35ef0702642ce8b97643242c0af0f9aa12cbbc58
+```
 
 
 ## Hardware and OS Info   
