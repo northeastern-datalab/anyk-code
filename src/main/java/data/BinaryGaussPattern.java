@@ -1,8 +1,7 @@
 package data;
 
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.cli.CommandLine;
@@ -19,57 +18,43 @@ import entities.Tuple;
 /** 
  * A subclass of the data generator {@link data.Database_Query_Generator}.
  * The relations are generated with two attributes.
- * The join pattern between the relations is uniform in the sense that 
- * we sample uniformly at random the attribute values from a fixed domain, given as a parameter.
- * A small domain size will result in a very dense join pattern.
- * A large domain size will result in many tuples not being part of the join result.
+ * The join pattern between the relations is skewed: 
+ * The values are drawn from a Gaussian distribution with mean 0 and a provided standard deviation (default=n/10),
+ * and are then rounded to the closest integer.
+ * If the standard deviation is too low compared to the size of the relations n, 
+ * the generator might take a very long time to produce the relation (because of set semantics).
  * @author Nikolaos Tziavelis
 */
-public class BinaryRandomPattern extends Database_Query_Generator
+public class BinaryGaussPattern extends Database_Query_Generator
 {	
 	/** 
-	 * The size of the domain of the attributes.
+	 * The standard deviation of the Gaussian distribution.
 	*/
-	private int domain;
+	private double stddev;
 	/** 
 	 * The type of the query (path, star, etc.).
 	 * Only affects the names of the attributes.
 	*/
 	private String query;
 
-	public BinaryRandomPattern(int n, int l, int domain, String query, WeightAssigner weight_assigner)
+	public BinaryGaussPattern(int n, int l, double stddev, String query, WeightAssigner weight_assigner)
 	{
 		super(n, l, weight_assigner);
-
-		// CAUTION: if the domain is too small, then this method would enter an endless loop
-		// The maximum n we can generate with domain is by choosing all the domain values in the first col
-		// followed by n values in the second col
-		long allowed_pairs = (long) domain * (long) domain;
-		if (allowed_pairs < n)
-		{
-			System.err.println("Domain too small for the specified n!");
-			System.exit(1);
-		}
-
-		this.domain = domain;
+		this.stddev = stddev;
 		this.query = query;
 	}
 
-	public BinaryRandomPattern(int n, int l, int domain, String query)
+	public BinaryGaussPattern(int n, int l, double stddev, String query)
 	{
 		super(n, l);
+		this.stddev = stddev;
+		this.query = query;
+	}
 
-		// CAUTION: if the domain is too small, then this method would enter an endless loop
-		// The maximum n we can generate with domain is by choosing all the domain values in the first col
-		// followed by n values in the second col
-		long allowed_pairs = (long) domain * (long) domain;
-		if (allowed_pairs < n)
-		{
-			System.err.println("Domain too small for the specified n!");
-			System.exit(1);
-		}
-
-		this.domain = domain;
+	public BinaryGaussPattern(int n, int l, String query)
+	{
+		super(n, l);
+        this.stddev = n / 10.0;
 		this.query = query;
 	}
 	
@@ -77,7 +62,7 @@ public class BinaryRandomPattern extends Database_Query_Generator
 	protected void populate_database()
 	{
 		Relation r;
-		double[] tup_vals;
+		double tup_vals[];
 		double tup_weight;
 		int attribute_no = 1;
 		Set<Tuple> non_duplicate_tuples;
@@ -102,15 +87,6 @@ public class BinaryRandomPattern extends Database_Query_Generator
 				r = new Relation("R" + relation_no, new String[]{"A1", "A" + (attribute_no + 1)});
 				attribute_no += 1;
 			}
-			else if (query.equals("onebranch"))
-			{
-				// A onebranch is like a path, but the third-to-last relation branches into two others
-				if (relation_no <= l - 1)
-					r = new Relation("R" + relation_no, new String[]{"A" + attribute_no, "A" + (attribute_no + 1)});
-				else 
-					r = new Relation("R" + relation_no, new String[]{"A" + (attribute_no - 2), "A" + (attribute_no + 1)});
-				attribute_no += 1;
-			}
 			else if (query.equals("cycle"))
 			{
 				// In a cycle, do the same as the path except for the last relation that must join back to the first one
@@ -132,25 +108,13 @@ public class BinaryRandomPattern extends Database_Query_Generator
 			}
 
 			// Add the random tuples to a set in order to avoid duplicates
-			non_duplicate_tuples = new TreeSet<Tuple>(new Comparator<Tuple>() 
-			{
-				public int compare(Tuple t1, Tuple t2) 
-				{
-					if (t1.values[0] > t2.values[0]) return 1;
-					else if (t1.values[0] < t2.values[0]) return -1;
-
-					if (t1.values[1] > t2.values[1]) return 1;
-					else if (t1.values[1] < t2.values[1]) return -1;
-				
-					return 0;
-				}
-			});
+			non_duplicate_tuples = new HashSet<Tuple>();
 			while (non_duplicate_tuples.size() < n)
 			{
 				// Instantiate a random tuple
 				tup_vals = new double[2];
-				tup_vals[0] = ThreadLocalRandom.current().nextInt(domain);
-				tup_vals[1] = ThreadLocalRandom.current().nextInt(domain);
+				tup_vals[0] = (double) Math.round(ThreadLocalRandom.current().nextGaussian() * this.stddev);
+				tup_vals[1] = (double) Math.round(ThreadLocalRandom.current().nextGaussian() * this.stddev);
 				tup_weight = this.weight_assigner.get_tuple_weight(non_duplicate_tuples.size(), relation_no);
 				new_tuple = new Tuple(tup_vals, tup_weight, r);
 
@@ -176,9 +140,9 @@ public class BinaryRandomPattern extends Database_Query_Generator
         q_option.setRequired(true);
 		options.addOption(q_option);
 
-        Option dom_option = new Option("dom", "domain", true, "size of domain to sample attribute values from");
-        dom_option.setRequired(false);
-        options.addOption(dom_option);
+        Option stddev_option = new Option("std", "standardDeviation", true, "standard deviation of Gaussian distribution");
+        stddev_option.setRequired(false);
+        options.addOption(stddev_option);
 
 
         CommandLineParser parser = new DefaultParser();
@@ -204,10 +168,10 @@ public class BinaryRandomPattern extends Database_Query_Generator
             System.exit(1);
 		}
 		int l = Integer.parseInt(cmd.getOptionValue("relationNo"));
-		int domain;
-        if (cmd.hasOption("domain")) domain = Integer.parseInt(cmd.getOptionValue("domain"));
-        else domain = n;
-        Database_Query_Generator gen = new BinaryRandomPattern(n, l, domain, query);
+		double stddev;
+        if (cmd.hasOption("standardDeviation")) stddev = Double.parseDouble(cmd.getOptionValue("standardDeviation"));
+        else stddev = n / 10.0;
+        Database_Query_Generator gen = new BinaryGaussPattern(n, l, stddev, query);
 		gen.parse_common_args(cmd);
         gen.create();
         gen.print_database();

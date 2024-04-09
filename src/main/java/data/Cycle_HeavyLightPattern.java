@@ -32,6 +32,11 @@ public class Cycle_HeavyLightPattern extends Database_Query_Generator
 		super(n, l);
 	}
 	
+	public Cycle_HeavyLightPattern(int n, int l, WeightAssigner weight_assigner)
+	{
+		super(n, l, weight_assigner);
+	}
+
 	@Override
 	protected void populate_database()
 	{
@@ -71,7 +76,7 @@ public class Cycle_HeavyLightPattern extends Database_Query_Generator
 			for (int j = 0; j < n ; j++)
 			{
 				tup_vals = new double[2];
-				tuple = new Tuple(tup_vals, get_uniform_tuple_weight(), r);
+				tuple = new Tuple(tup_vals, this.weight_assigner.get_tuple_weight(j, relation_no), r);
 				r.insert(tuple);				
 			}
 
@@ -105,17 +110,10 @@ public class Cycle_HeavyLightPattern extends Database_Query_Generator
         // Parse the command line
         Options options = new Options();
 
-        Option n_option = new Option("n", "relationSize", true, "number of tuples per relation");
-        n_option.setRequired(true);
-        options.addOption(n_option);
+		// First parse the options that are common to all generators
+		for (Option option : common_command_line_options()) options.addOption(option);
 
-        Option l_option = new Option("l", "databaseSize", true, "number of relations");
-        l_option.setRequired(true);
-        options.addOption(l_option);
-
-        Option out_option = new Option("o", "outputFile", true, "directory of output file (default: stdout)");
-        out_option.setRequired(false);
-        options.addOption(out_option);
+		// No generator-specific options
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -132,10 +130,9 @@ public class Cycle_HeavyLightPattern extends Database_Query_Generator
         }
 
 		int n = Integer.parseInt(cmd.getOptionValue("relationSize"));
-		int l = Integer.parseInt(cmd.getOptionValue("databaseSize"));
-
+		int l = Integer.parseInt(cmd.getOptionValue("relationNo"));
         Database_Query_Generator gen = new Cycle_HeavyLightPattern(n, l);
-        if (cmd.hasOption("outputFile")) gen.setOutputFile(cmd.getOptionValue("outputFile"));
+		gen.parse_common_args(cmd);
         gen.create();
         gen.print_database();
 	}

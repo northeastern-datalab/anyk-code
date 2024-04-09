@@ -102,4 +102,12 @@ public class Relation
         str.append("End of " + this.relation_id + "\n");
         return str.toString();
     }
+
+    public String toString_NoHeader()
+    {
+        StringBuilder str = new StringBuilder();
+        for (Tuple t : this.tuples)
+            str.append(t.flat_format() + "\n");
+        return str.toString();
+    }
 }

@@ -93,6 +93,54 @@ provided in a different json file, or via the command line (has priority).
 
 - `path_optimization`: If the query specified in the json file has a path structure, then turning this on may boost performance.
 
+## Synthetic data generator
+
+The produced jar contains a generator for synthetic data in the `data/` package. 
+It creates ternary relations of size $n$, where the first two columns are intended for joins, while the third column encodes tuple weight.
+The tuples of every relation are always distinct.
+We parameterize our generator across three dimensions.
+- We generate different join distributions by controlling the values that populate the first two columns. 
+  - For a Uniform distribution, we draw integers in $[0 \ldots d]$ uniformly at random with replacement for some given value $d$, which defaults to $n / 10$.
+  - For a Gaussian distribution, we round to integers the values drawn with a mean of $0$ and a given standard deviation, which defaults to $n / 10$.
+
+- We generate different weight distributions.
+  - For a Uniform distribution, we draw real numbers from $[0, w)$ where $w$ defaults to $10^4$.
+  - For a Gaussian distribution, we take as input the mean and the standard deviation, which default to $0$ and $1$ respectively.
+  - For a Lexicographic distribution, we ensure that the tuples of the first relation are always prioritized in the ranking and in the case of ties,
+  the same happens with tuples of the second relation, and so on.
+
+- We generate different query patterns by changing the names of the columns, assuming that two columns join if and only if they have the same name.
+    Our generator supports path, star, and simple cycle patterns.
+
+Example usage:
+
+    java -cp target/any-k-1.0.jar data.BinaryRandomPattern -q "path" -n 200 -l 3 -dom 100 -w uniform -o Synthetic_data/inputs/example.in
+
+The above will create a 3-path instance with 3 binary relations of size 200, drawn uniformly at random from a domain of size 100 and weights also drawn uniformly. The input file will be saved in `Synthetic_data/inputs/` (the directory needs to be created beforehand). 
+
+To instead create a 4-star pattern with Gaussian domain values and a lexicographic ranking:
+
+    java -cp target/any-k-1.0.jar data.BinaryGaussPattern -q "star" -n 200 -l 4 -w lex -o Synthetic_data/inputs/example.in
+
+By default, the relations are all written in the same file, in a format used by some classes under `experiments`.
+If instead you want to create a different file per relation use the `-mf` flag.
+This will also remove headers and footers.
+
+    java -cp target/any-k-1.0.jar data.BinaryRandomPattern -q "path" -n 200 -l 3 -dom 100 -w uniform -o example.csv -mf
+
+The above will produce 3 different files: `example_1.in`, `example_2.csv`, `example_3.csv`
+
+
+## Inequality-join to Equi-join Converter
+The repository also contains tools to transform a join that may contain a DNF of join conditions to an equi-join over (polylogarithmically) larger relations.
+
+Example Usage:
+
+    java -cp target/any-k-1.0.jar factorization.Equijoin_Converter -i src/main/resources/reddit -q QR1 -l 3
+
+The above takes as an input a small sample of the Reddit dataset and a 3-path query "QR1" that contains inequality predicates (defined in `src/main/java/factorization/Equijoin_Converter`),
+and produces in the standard output new relations that join with equality predicates using new columns V1, V2, ...
+
 
 ## Reproducibility of Experiments
 The repository contains detailed description for reproducing the experimental results reported in our research papers:
