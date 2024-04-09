@@ -28,7 +28,7 @@ public class TDP_Eager extends TDP_Part
     {
         // Initialize the successor lists
         for (TDP_Decision dec : decisions.list_of_decisions)
-            dec.successors = new ArrayList<TDP_Decision>();
+            dec.successors = new ArrayList<TDP_Decision>(1);
 
         // For each node, we sort all decisions and then store a pointer for each decision according to the sorted order
         ArrayList<TDP_Decision> list_of_decisions = decisions.list_of_decisions;

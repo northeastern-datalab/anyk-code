@@ -73,6 +73,23 @@ public class DP_Suffix_Solution extends DP_Solution implements Comparable<DP_Suf
     {
     	return this.first_decision;
     }
+
+    public double get_final_cost()
+    {
+        return this.cost;
+    }
+
+    public double get_length()
+    {
+        int res = 0;
+        DP_Suffix_Solution curr_suffix = this;
+        while (curr_suffix != null)
+        {
+            res += 1;
+            curr_suffix = curr_suffix.get_shorter();
+        }
+        return res;
+    }
     
     /** 
      * @return String A string representation of the solution 
@@ -142,5 +159,17 @@ public class DP_Suffix_Solution extends DP_Solution implements Comparable<DP_Suf
             if (this.first_decision.hashCode() < other.first_decision.hashCode()) return -1;
             else return 1;
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) 
+    {
+        if (!(obj instanceof DP_Solution))
+            return false;
+        DP_Solution other = (DP_Solution) obj;
+        if ((obj instanceof DP_Suffix_Solution)) 
+            return this.solutionToTuples().equals(other.solutionToTuples());
+        else
+            return this.solutionToTuples_strict_order().equals(other.solutionToTuples_strict_order());
     }
 }

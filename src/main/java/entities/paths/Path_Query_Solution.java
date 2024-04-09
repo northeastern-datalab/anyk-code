@@ -28,6 +28,11 @@ public class Path_Query_Solution extends DP_Solution implements Comparable<Path_
         }
     }
 
+    public double get_final_cost()
+    {
+        return this.cost;
+    }
+
     /** 
      * @return String
      */

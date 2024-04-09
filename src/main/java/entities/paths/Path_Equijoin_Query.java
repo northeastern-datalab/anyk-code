@@ -217,4 +217,64 @@ public class Path_Equijoin_Query
 
         this.length = 4;
     }    
+
+    /** 
+     * Returns a small example for debugging purposes.
+     */
+    public Path_Equijoin_Query(int num)
+    {
+        if (num==2)
+        {
+            /*
+                    R1                        R2                             R3                  
+                    ----                      ----                           ----       
+                A1  |  A2  |  A3           A3  |   A4   | A5           A5  |  A6   |  A7  
+                -------------------       ------------------------     -------------------------     
+                0   |   1  |  0  (1)       0   |   100  | 0  (100)      0  |   10  |  0  (10)
+                0   |   2  |  0  (2)       0   |   200  | 0  (200)      0  |   20  |  0  (20)
+                0   |   3  |  0  (3)       0   |   300  | 0  (300)      0  |   30  |  0  (30)
+
+            */
+
+            double[] valArray;
+            String[] stringArray;
+            Relation r;
+            this.relations = new ArrayList<Relation>();
+            this.join_conditions = new ArrayList<Pair<int[], int[]>>();
+
+            stringArray = new String[]{"A1", "A2", "A3"};
+            r = new Relation("R1", stringArray);
+            valArray = new double[]{0, 1, 0};
+            r.insert(new Tuple(valArray, 1.0, r));
+            valArray = new double[]{0, 2, 0};
+            r.insert(new Tuple(valArray, 2.0, r));
+            valArray = new double[]{0, 3, 0};
+            r.insert(new Tuple(valArray, 3.0, r));
+            this.relations.add(r);
+
+            stringArray = new String[]{"A3", "A4", "A5"};
+            r = new Relation("R2", stringArray);
+            valArray = new double[]{0, 100, 0};
+            r.insert(new Tuple(valArray, 100.0, r));
+            valArray = new double[]{0, 200, 0};
+            r.insert(new Tuple(valArray, 200.0, r));
+            valArray = new double[]{0, 300, 0};
+            r.insert(new Tuple(valArray, 300.0, r));
+            this.relations.add(r);        
+            this.join_conditions.add(new Pair<int[], int[]>(new int[]{2}, new int[]{0}));
+
+            stringArray = new String[]{"A5", "A6", "A7"};
+            r = new Relation("R3", stringArray);
+            valArray = new double[]{0, 10, 0};
+            r.insert(new Tuple(valArray, 10.0, r));
+            valArray = new double[]{0, 20, 0};
+            r.insert(new Tuple(valArray, 20.0, r));
+            valArray = new double[]{0, 30, 0};
+            r.insert(new Tuple(valArray, 30.0, r));
+            this.relations.add(r);  
+            this.join_conditions.add(new Pair<int[], int[]>(new int[]{2}, new int[]{0}));
+
+            this.length = 3;
+        }
+    }    
 }

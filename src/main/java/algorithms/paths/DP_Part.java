@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
+import org.jheaps.dag.HollowHeap;
+import org.jheaps.tree.FibonacciHeap;
+import org.jheaps.tree.PairingHeap;
+
 import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
@@ -13,6 +17,7 @@ import entities.paths.DP_Prefix_Solution;
 import entities.paths.DP_Problem_Instance;
 import entities.paths.DP_Solution;
 import entities.paths.DP_State_Node;
+import util.CompileTimeConfig;
 /** 
  * Implementation of Anyk-Part for DP, a ranked enumeration algorithm that relies on the Lawler procedure.
  * The different variants are implemented as subclasses, each one implementing the abstract methods differently.<br>
@@ -34,7 +39,11 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 	/** 
 	 * Maintains all the prefix solutions that are candidates for the next best solution.
 	*/
-	protected PriorityQueue<DP_Prefix_Solution> global_pq;
+	protected PriorityQueue<DP_Prefix_Solution> global_pq_binary_heap;
+	protected FibonacciHeap<DP_Prefix_Solution,Object> global_pq_fibonacci_heap;
+	protected PairingHeap<DP_Prefix_Solution,Object> global_pq_pairing_heap;
+	protected HollowHeap<DP_Prefix_Solution,Object> global_pq_hollow_heap;
+
 	/** 
 	 * Stores the solution returned in the previous call of {@link #get_next}.
 	 * This is required because candidates generated from the top-k'th solution 
@@ -62,13 +71,27 @@ public abstract class DP_Part extends DP_Anyk_Iterator
     	// Initialize the global PQ with an empty prefix (that contains only the starting node)
 		// this.global_pq = new Priority_Queue<DP_Prefix_Solution>(this.heap_type);
 		// Just use a simple binary heap
-		this.global_pq = new PriorityQueue<DP_Prefix_Solution>();
-    	// The prefix we start with contains only the best decision to go from starting_node to stage 1
+		if (CompileTimeConfig.heap_type == "binary_heap")
+			this.global_pq_binary_heap = new PriorityQueue<DP_Prefix_Solution>();
+		else if (CompileTimeConfig.heap_type == "fibonacci_heap")
+			this.global_pq_fibonacci_heap = new FibonacciHeap<DP_Prefix_Solution,Object>();
+		else if (CompileTimeConfig.heap_type == "pairing_heap")
+			this.global_pq_pairing_heap = new PairingHeap<DP_Prefix_Solution,Object>();
+		else if (CompileTimeConfig.heap_type == "hollow_heap")
+			this.global_pq_hollow_heap = new HollowHeap<DP_Prefix_Solution,Object>();
+		// The prefix we start with contains only the best decision to go from starting_node to stage 1
     	// That way, we guarantee that for top-2 we start taking successor solutions from stage 1
     	if (instance.starting_node.get_opt_cost() != Double.POSITIVE_INFINITY)	// Corner case: if no path can reach the terminal node, leave the pq empty
     	{
 	    	DP_Prefix_Solution starting_prefix = new DP_Prefix_Solution(instance.starting_node.get_best_decision());
-	    	this.global_pq.add(starting_prefix);    		
+	    	if (CompileTimeConfig.heap_type == "binary_heap")
+				this.global_pq_binary_heap.add(starting_prefix);    	
+			else if (CompileTimeConfig.heap_type == "fibonacci_heap")
+				this.global_pq_fibonacci_heap.insert(starting_prefix);
+			else if (CompileTimeConfig.heap_type == "pairing_heap")
+				this.global_pq_pairing_heap.insert(starting_prefix);
+			else if (CompileTimeConfig.heap_type == "hollow_heap")
+				this.global_pq_hollow_heap.insert(starting_prefix);
 		}
 
 		// By default, initialize the data structures needed lazily
@@ -108,19 +131,35 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 			}
 			// If the PQ is empty heapify instead of pushing
 			// Especially helpful in the second iteration of DP_Min
-            if (global_pq.isEmpty())
-                // global_pq = new Priority_Queue<DP_Prefix_Solution>(heap_type, new_candidates);
-                global_pq = new PriorityQueue<DP_Prefix_Solution>(new_candidates);
+			if (CompileTimeConfig.heap_type == "binary_heap" && global_pq_binary_heap.isEmpty())
+                global_pq_binary_heap = new PriorityQueue<DP_Prefix_Solution>(new_candidates);
             else
                 // global_pq.bulk_push(new_candidates);
 				add_candidates(new_candidates);
     	}
 
     	// Pop the best solution from the global PQ
-		// popped_solution = global_pq.pop();
-		popped_solution = global_pq.poll();
-		// If null is returned, then we have enumerated all solutions
-		if (popped_solution == null) return null;
+		// If the PQ is empty, then we have enumerated all solutions
+		if (CompileTimeConfig.heap_type == "binary_heap")
+		{
+			if (global_pq_binary_heap.isEmpty()) return null;
+			popped_solution = global_pq_binary_heap.poll();
+		}
+		else if (CompileTimeConfig.heap_type == "fibonacci_heap")
+		{
+			if (global_pq_fibonacci_heap.isEmpty()) return null;
+			popped_solution = global_pq_fibonacci_heap.deleteMin().getKey();
+		}
+		else if (CompileTimeConfig.heap_type == "pairing_heap")
+		{
+			if (global_pq_pairing_heap.isEmpty()) return null;
+			popped_solution = global_pq_pairing_heap.deleteMin().getKey();
+		}
+		else if (CompileTimeConfig.heap_type == "hollow_heap")
+		{
+			if (global_pq_hollow_heap.isEmpty()) return null;
+			popped_solution = global_pq_hollow_heap.deleteMin().getKey();
+		}
 		// Record its length so that we know from which stage onwards 
 		// we have to generate successor solutions in the next call
 		latest_sidetrack_stage = popped_solution.length;
@@ -158,8 +197,26 @@ public abstract class DP_Part extends DP_Anyk_Iterator
 	
 	private void add_candidates(Collection<DP_Prefix_Solution> cands)
 	{
-		for (DP_Prefix_Solution cand : cands)
-			global_pq.add(cand);
+		if (CompileTimeConfig.heap_type == "binary_heap")
+		{
+			for (DP_Prefix_Solution cand : cands)
+				global_pq_binary_heap.add(cand);
+		}
+		else if (CompileTimeConfig.heap_type == "fibonacci_heap")
+		{
+			for (DP_Prefix_Solution cand : cands)
+				global_pq_fibonacci_heap.insert(cand);
+		}
+		else if (CompileTimeConfig.heap_type == "pairing_heap")
+		{
+			for (DP_Prefix_Solution cand : cands)
+				global_pq_pairing_heap.insert(cand);
+		}
+		else if (CompileTimeConfig.heap_type == "hollow_heap")
+		{
+			for (DP_Prefix_Solution cand : cands)
+				global_pq_hollow_heap.insert(cand);
+		}
 	}
 
 	/** 

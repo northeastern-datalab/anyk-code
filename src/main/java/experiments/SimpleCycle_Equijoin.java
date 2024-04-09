@@ -14,6 +14,7 @@ import org.apache.commons.cli.ParseException;
 import algorithms.cycles.NPRR;
 import algorithms.cycles.NPRR_Sort;
 import algorithms.cycles.SimpleCycle_Anyk_Iterator;
+import data.BinaryRandomPattern;
 import data.Cycle_HeavyLightPattern;
 import data.Database_Query_Generator;
 import entities.Relation;
@@ -189,6 +190,12 @@ public class SimpleCycle_Equijoin
         }
 
 
+        // ======= Warm-up phase =======
+        double dummy_counter = 0.0;  // to verify the computation is not removed by the compiler 
+        for (int i = 0; i < 10000; i++) 
+            dummy_counter += warm_up_cycle_equijoin(algorithm, heap_type);
+        System.out.println("Dummy counter = " + dummy_counter);
+
 
         // ======= Run =======
         Measurements measurements = new Measurements(sample_rate, max_k);
@@ -231,5 +238,85 @@ public class SimpleCycle_Equijoin
             }   
         }
         measurements.print();
+    }
+
+    private static double warm_up_cycle_equijoin(String algorithm, String heap_type)
+    {
+        Database_Query_Generator gen;
+        SimpleCycle_Equijoin_Query query;
+        Tuple solution_tuple;
+        double dummy_counter = 0;  // to verify the computation is not removed by the compiler
+
+        // Heavy-Light pattern
+        gen = new Cycle_HeavyLightPattern(20, 4);
+        gen.create();
+        query = new SimpleCycle_Equijoin_Query(gen.get_database());
+        if (algorithm.equals("NPRR"))
+        {
+            NPRR iter = new NPRR(query);
+            while (true)
+            {
+                solution_tuple = iter.get_next();
+                if (solution_tuple == null) break;
+                dummy_counter += solution_tuple.values[0];
+            }
+        }
+        else if (algorithm.equals("NPRR_Sort"))
+        {
+            NPRR_Sort iter = new NPRR_Sort(query);
+            while (true)
+            {
+                solution_tuple = iter.get_next();
+                if (solution_tuple == null) break;
+                dummy_counter += solution_tuple.values[0];
+            }
+        }
+        else
+        {
+            SimpleCycle_Anyk_Iterator iter = new SimpleCycle_Anyk_Iterator(query, algorithm, heap_type);
+            while (true)
+            {
+                solution_tuple = iter.get_next();
+                if (solution_tuple == null) break;
+                dummy_counter += solution_tuple.values[0];
+            }   
+        }
+
+        // BinaryRandom pattern
+        gen = new BinaryRandomPattern(20, 4, 6, "cycle");
+        gen.create();
+        query = new SimpleCycle_Equijoin_Query(gen.get_database());
+        if (algorithm.equals("NPRR"))
+        {
+            NPRR iter = new NPRR(query);
+            while (true)
+            {
+                solution_tuple = iter.get_next();
+                if (solution_tuple == null) break;
+                dummy_counter += solution_tuple.values[0];
+            }
+        }
+        else if (algorithm.equals("NPRR_Sort"))
+        {
+            NPRR_Sort iter = new NPRR_Sort(query);
+            while (true)
+            {
+                solution_tuple = iter.get_next();
+                if (solution_tuple == null) break;
+                dummy_counter += solution_tuple.values[0];
+            }
+        }
+        else
+        {
+            SimpleCycle_Anyk_Iterator iter = new SimpleCycle_Anyk_Iterator(query, algorithm, heap_type);
+            while (true)
+            {
+                solution_tuple = iter.get_next();
+                if (solution_tuple == null) break;
+                dummy_counter += solution_tuple.values[0];
+            }   
+        }
+
+        return dummy_counter;
     }
 }

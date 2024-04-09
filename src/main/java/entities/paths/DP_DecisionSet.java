@@ -1,6 +1,7 @@
 package entities.paths;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
@@ -38,8 +39,20 @@ public class DP_DecisionSet
     public Stack<Integer> pivot_stack;
     /** 
      * The index in the sorted list of decisions of the next element to be found by {@link algorithms.paths.DP_Quick}.
-    */    
+    */ 
     public int next_idx;
+    /** 
+     * For {@link algorithms.paths.DP_PartPlus}: 
+	 * Stores the sorted order of suffixes (each suffix is a list of decisions) starting from a DecisionSet.
+	 * Note that a decision from the DecisionSet itself *is* contained in the suffix.
+	*/
+    public List<DP_Suffix_Solution> sorted_suffixes;
+    /** 
+	 * For {@link algorithms.paths.DP_PartPlus}: 
+     * A list of prefixes that are subscribed and waiting for the next suffix to be inserted in the sorted list.
+     * Note that a decision from the DecisionSet itself is *not* contained in the prefix.
+	*/
+    public List<DP_Prefix_Solution_Follower> subscribers;  
 
     /** 
      * PQ data structure used by {@link algorithms.paths.DP_Recursive}.
@@ -57,6 +70,8 @@ public class DP_DecisionSet
         this.partial_order_computed = false;
         this.pq_rec = null;
         this.rec_best_suffix = null;
+        this.sorted_suffixes = null;
+        this.subscribers = null;
     }
     
     /** 

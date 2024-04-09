@@ -23,11 +23,6 @@ public class DP_All extends DP_Part
 	public DP_All(DP_Problem_Instance inst, Configuration conf)
     {
     	super(inst, conf);
-
-        // Deprecated - initialization happens on the fly        
-        // For each decision set, make the best decision point to all the others as its successors
-        // To find them, traverse the DP graph in a DFS manner
-        // initialize_partial_order_DFS(instance.starting_node);
     }
 
     // Called before the enumeration begins on each node of the DP graph

@@ -7,7 +7,7 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import entities.Join_Predicate;
-import entities.paths.DP_State_Node;
+import entities.State_Node;
 import util.Common;
 
 /** 
@@ -15,7 +15,7 @@ import util.Common;
  * where the join condition is an arbitrary number of equalities and a single inequality/non-equality/band predicate.
  * The methods rely on partitioning the domain values.
  * The resulting representation creates 2 intermediate layers of nodes between the relations.
- * Compared to @link{factorization.Conjunction}, the methods of this class use O(nloglogn) space instead of O(nlogn).
+ * Compared to @link{factorization.Binary_Partitioning}, the methods of this class use O(nloglogn) space instead of O(nlogn).
  * The running time for all methods is O(nlogn) since we always sort the relations.
  * @author Nikolaos Tziavelis
 */
@@ -33,21 +33,21 @@ public class Multiway_Partitioning
      * @param right The second relation/stage as a list of DP state-nodes.
      * @param ps A list of equality predicates and a single band predicate at the end of the list.
      */
-    public static void factorize_band(List<DP_State_Node> left, List<DP_State_Node> right, List<Join_Predicate> ps)
+    public static void factorize_band(List<? extends State_Node> left, List<? extends State_Node> right, List<Join_Predicate> ps)
     {
         Join_Predicate band = ps.get(ps.size() - 1);
         // First take care of the equalities that precede the single non-equality condition
-        for (Pair<List<DP_State_Node>,List<DP_State_Node>> equality_partition : 
+        for (Pair<List<? extends State_Node>,List<? extends State_Node>> equality_partition : 
                 Equality.split_by_equality(left, right, ps.subList(0, ps.size() - 1)))
         {
-            List<DP_State_Node> left_partition = equality_partition.getValue0();
-            List<DP_State_Node> right_partition = equality_partition.getValue1();
+            List<? extends State_Node> left_partition = equality_partition.getValue0();
+            List<? extends State_Node> right_partition = equality_partition.getValue1();
 
             // Sort before translating the band and calling the recursive partitioning algorithm
             Common.sort_stage(left_partition, band.attr_idx_1);
             Common.sort_stage(right_partition, band.attr_idx_2);
           
-            for (Triplet<Join_Predicate,List<DP_State_Node>,List<DP_State_Node>> ineq_group : 
+            for (Triplet<Join_Predicate,List<? extends State_Node>,List<? extends State_Node>> ineq_group : 
                 Band.band_grouping(left_partition, right_partition, band))
             {
                 partition_inequality_rec(ineq_group.getValue1(), ineq_group.getValue2(), ineq_group.getValue0());
@@ -65,15 +65,15 @@ public class Multiway_Partitioning
      * @param right The second relation/stage as a list of DP state-nodes.
      * @param ps A list of equality predicates and a single non-equality predicate at the end of the list.
      */
-    public static void factorize_nonequality(List<DP_State_Node> left, List<DP_State_Node> right, List<Join_Predicate> ps)
+    public static void factorize_nonequality(List<? extends State_Node> left, List<? extends State_Node> right, List<Join_Predicate> ps)
     {
         Join_Predicate nonequality = ps.get(ps.size() - 1);
         // First take care of the equalities that precede the single non-equality condition
-        for (Pair<List<DP_State_Node>,List<DP_State_Node>> equality_partition : 
+        for (Pair<List<? extends State_Node>,List<? extends State_Node>> equality_partition : 
                 Equality.split_by_equality(left, right, ps.subList(0, ps.size() - 1)))
         {
-            List<DP_State_Node> left_partition = equality_partition.getValue0();
-            List<DP_State_Node> right_partition = equality_partition.getValue1();
+            List<? extends State_Node> left_partition = equality_partition.getValue0();
+            List<? extends State_Node> right_partition = equality_partition.getValue1();
 
             // Sort before calling the recursive partitioning algorithm
             Common.sort_stage(left_partition, nonequality.attr_idx_1);
@@ -97,15 +97,15 @@ public class Multiway_Partitioning
      * @param right The second relation/stage as a list of DP state-nodes.
      * @param ps A list of equality predicates and a single inequality predicate at the end of the list.
      */
-    public static void factorize_inequality(List<DP_State_Node> left, List<DP_State_Node> right, List<Join_Predicate> ps)
+    public static void factorize_inequality(List<? extends State_Node> left, List<? extends State_Node> right, List<Join_Predicate> ps)
     {
         Join_Predicate inequality = ps.get(ps.size() - 1);
         // First take care of the equalities that precede the single inequality condition
-        for (Pair<List<DP_State_Node>,List<DP_State_Node>> equality_partition : 
+        for (Pair<List<? extends State_Node>,List<? extends State_Node>> equality_partition : 
                 Equality.split_by_equality(left, right, ps.subList(0, ps.size() - 1)))
         {
-            List<DP_State_Node> left_partition = equality_partition.getValue0();
-            List<DP_State_Node> right_partition = equality_partition.getValue1();
+            List<? extends State_Node> left_partition = equality_partition.getValue0();
+            List<? extends State_Node> right_partition = equality_partition.getValue1();
 
             // Sort before calling the recursive partitioning algorithm
             Common.sort_stage(left_partition, inequality.attr_idx_1);
@@ -124,20 +124,20 @@ public class Multiway_Partitioning
      * @param right The second (sorted) subset of a relation/stage.
      * @param inequality A single inequality predicate.
      */
-    private static void partition_inequality_rec(List<DP_State_Node> left, List<DP_State_Node> right, Join_Predicate inequality)
+    private static void partition_inequality_rec(List<? extends State_Node> left, List<? extends State_Node> right, Join_Predicate inequality)
     {
         String rec_step_id = String.valueOf(left.size() + right.size());    // Used for naming the intermediate nodes
-        List<DP_State_Node> left_i, right_i, left_j, right_j;
+        List<? extends State_Node> left_i, right_i, left_j, right_j;
 
         int distinct_cnt = Common.count_distinct_vals(left, right, inequality.attr_idx_1, inequality.attr_idx_2, inequality.parameter);
         // Base Case
         if (distinct_cnt <= 1) return;
         // Make sqrt(distinct_vals) partitions
-        List<Pair<List<DP_State_Node>,List<DP_State_Node>>> inequality_partitions = 
+        List<Pair<List<? extends State_Node>,List<? extends State_Node>>> inequality_partitions = 
             Common.split_by_distinct(left, right, inequality, (int) Math.ceil(Math.sqrt(distinct_cnt)), (int) Math.floor(Math.sqrt(distinct_cnt)));
         // Initialize the intermediate stages
-        List<DP_State_Node> intermediate_stage_1 = new ArrayList<DP_State_Node>(inequality_partitions.size());
-        List<DP_State_Node> intermediate_stage_2 = new ArrayList<DP_State_Node>(inequality_partitions.size());
+        List<State_Node> intermediate_stage_1 = new ArrayList<State_Node>(inequality_partitions.size());
+        List<State_Node> intermediate_stage_2 = new ArrayList<State_Node>(inequality_partitions.size());
         for (int i = 0; i <inequality_partitions.size(); i++)
         {
             intermediate_stage_1.add(null);
@@ -168,22 +168,18 @@ public class Multiway_Partitioning
                             // First check if their intermediate nodes have been created
                             if (intermediate_stage_1.get(j) == null)
                             {
-                                // Materialize the intermediate node
-                                DP_State_Node intermediate_node_1 = new DP_State_Node("X" + rec_step_id + "_" + j);
+                                // Materialize the intermediate node and connect left partition j to the new intermediate node
+                                State_Node intermediate_node_1 = Node_Connector.connect_left_to_intermediate(left_j, null, "X" + rec_step_id + "_" + j);
                                 intermediate_stage_1.set(j, intermediate_node_1);
-                                // Connect left partition j to the new intermediate node
-                                for (DP_State_Node l : left_j) l.add_decision(intermediate_node_1, 0.0);
                             }
                             if (intermediate_stage_2.get(i) == null)
                             {
-                                // Materialize the intermediate node
-                                DP_State_Node intermediate_node_2 = new DP_State_Node("Y" + rec_step_id + "_" + i);
+                                // Materialize the intermediate node and connect right partition i to the new intermediate node
+                                State_Node intermediate_node_2 = Node_Connector.connect_intermediate_to_right(null, right_i, "Y" + rec_step_id + "_" + i);
                                 intermediate_stage_2.set(i, intermediate_node_2);
-                                // Connect right partition i to the new intermediate node
-                                for (DP_State_Node r : right_i) intermediate_node_2.add_decision(r, r.toTuple().cost);
                             }
                             // Now connect the two intermediate nodes
-                            intermediate_stage_1.get(j).add_decision(intermediate_stage_2.get(i), 0.0);
+                            Node_Connector.connect_intermediate_nodes(intermediate_stage_1.get(j), intermediate_stage_2.get(i), null);
                         }
                     }
                 }
@@ -202,22 +198,18 @@ public class Multiway_Partitioning
                             // First check if their intermediate nodes have been created
                             if (intermediate_stage_1.get(i) == null)
                             {
-                                // Materialize the intermediate node
-                                DP_State_Node intermediate_node_1 = new DP_State_Node("X" + rec_step_id + "_" + i);
+                                // Materialize the intermediate node and connect left partition i to the new intermediate node
+                                State_Node intermediate_node_1 = Node_Connector.connect_left_to_intermediate(left_i, null, "X" + rec_step_id + "_" + i);
                                 intermediate_stage_1.set(i, intermediate_node_1);
-                                // Connect left partition i to the new intermediate node
-                                for (DP_State_Node l : left_i) l.add_decision(intermediate_node_1, 0.0);
                             }
                             if (intermediate_stage_2.get(j) == null)
                             {
-                                // Materialize the intermediate node
-                                DP_State_Node intermediate_node_2 = new DP_State_Node("Y" + rec_step_id + "_" + j);
+                                  // Materialize the intermediate node and connect right partition j to the new intermediate node
+                                State_Node intermediate_node_2 = Node_Connector.connect_intermediate_to_right(null, right_j, "Y" + rec_step_id + "_" + j);
                                 intermediate_stage_2.set(j, intermediate_node_2);
-                                // Connect right partition j to the new intermediate node
-                                for (DP_State_Node r : right_j) intermediate_node_2.add_decision(r, r.toTuple().cost);
                             }
                             // Now connect the two intermediate nodes
-                            intermediate_stage_1.get(i).add_decision(intermediate_stage_2.get(j), 0.0);
+                            Node_Connector.connect_intermediate_nodes(intermediate_stage_1.get(i), intermediate_stage_2.get(j), null);
                         }
                     }
                 }                

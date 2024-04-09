@@ -234,14 +234,11 @@ public abstract class DP_Problem_Instance
     /** 
      * Computes the total number of DP solutions to the problem instance.
      * These are paths that begin at the starting node and end at some terminal node.
-     * With the current equi-join implementation, this has a quadratic cost for @link{entities.DP_Path_Equijoin_Instance}.
-     * For @link{entities.DP_Path_ThetaJoin_Instance} where the intermediate nodes are explicitly materialized,
-     * the cost is linear in the size of the graph.
      * @return BigInteger The number of solutions = paths in the state-space graph.
      */
     public BigInteger count_solutions()
     {
-        return compute_no_solutions(this.starting_node, new HashMap<DP_State_Node,BigInteger>());
+        return compute_no_solutions(this.starting_node, new HashMap<DP_State_Node,BigInteger>(), new HashMap<DP_DecisionSet,BigInteger>());
     }
 
     /** 
@@ -249,10 +246,11 @@ public abstract class DP_Problem_Instance
      * The computed cost is stored in a map passed in each call as an argument 
      * so that we don't have to recompute it.
      * @param node The node we start from.
-     * @param counts A map containing the counts for all the nodes that we have called this method on. 
+     * @param counts A map containing the counts for all the nodes that we have called this method on.
+     * @param counts_dec A map containing the counts for all the decision sets that we have called this method on. 
      * @return long The total number of DP solutions starting from node.
      */
-    private BigInteger compute_no_solutions(DP_State_Node node, Map<DP_State_Node,BigInteger> counts)
+    private BigInteger compute_no_solutions(DP_State_Node node, Map<DP_State_Node,BigInteger> counts, Map<DP_DecisionSet,BigInteger> counts_dec)
     {
         BigInteger res;
         if ((res = counts.get(node)) == null)
@@ -265,12 +263,17 @@ public abstract class DP_Problem_Instance
             }
             else
             {
-                res = BigInteger.ZERO;
                 DP_DecisionSet decisions = node.decisions;
-                // Iterate through the available decisions and add up their counts
-                for (DP_Decision dec : decisions.list_of_decisions)
+                if ((res = counts_dec.get(decisions)) == null)
                 {
-                    res = res.add(compute_no_solutions(dec.target, counts));
+                    res = BigInteger.ZERO;
+                    // Iterate through the available decisions and add up their counts
+                    for (DP_Decision dec : decisions.list_of_decisions)
+                    {
+                        res = res.add(compute_no_solutions(dec.target, counts, counts_dec));
+                    }
+                    // Store the count
+                    counts_dec.put(decisions, res);
                 }
             }
             // Store the count

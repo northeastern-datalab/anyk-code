@@ -23,16 +23,13 @@ public class DP_Lazy extends DP_Part
 	public DP_Lazy(DP_Problem_Instance inst, Configuration conf)
     {
     	super(inst, conf);
-
-        // Deprecated - initialization happens on the fly
-        // initialize_partial_order_DFS(instance.starting_node);
     }
     
     public void initialize_partial_order(DP_DecisionSet decisions)
     {
         // Initialize the successor lists
         for (DP_Decision dec : decisions.list_of_decisions)
-            dec.successors = new ArrayList<DP_Decision>();
+            dec.successors = new ArrayList<DP_Decision>(1);
 
         // Initialize a PQ for this decision set and insert all the decisions except the best one
         // To do this efficiently, build the entire heap and pop once

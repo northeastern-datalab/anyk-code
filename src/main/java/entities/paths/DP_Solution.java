@@ -47,6 +47,12 @@ public abstract class DP_Solution// implements Bulk_Comparable
         return this.cost;
     }
 
+    /** 
+     * @return double The finalcost of this solution. 
+     * If it is a partial *prefix* solution, then it is the cost that it can have when optimally expanded.
+     */
+    public abstract double get_final_cost();
+
     /* DEPRECATED: Bulk_Comparable interface for batch inserts to a PQ
     public void set_group(Object group)
     {
@@ -78,16 +84,7 @@ public abstract class DP_Solution// implements Bulk_Comparable
     @Override
     public int hashCode() 
     {
-        return solutionToTuples().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (!(obj instanceof DP_Solution))
-            return false;
-        DP_Solution other = (DP_Solution) obj;
-        return this.solutionToTuples().equals(other.solutionToTuples());
+        return solutionToTuples_strict_order().hashCode();
     }
     
     /** 
@@ -97,5 +94,14 @@ public abstract class DP_Solution// implements Bulk_Comparable
     public String toString()
     {
         return this.solutionToString();
+    }
+
+    @Override
+    public boolean equals(Object obj) 
+    {
+        if (!(obj instanceof DP_Solution))
+            return false;
+        DP_Solution other = (DP_Solution) obj;
+        return this.solutionToTuples_strict_order().equals(other.solutionToTuples_strict_order());
     }
 }

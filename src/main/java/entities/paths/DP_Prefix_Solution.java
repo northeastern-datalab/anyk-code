@@ -77,6 +77,11 @@ public class DP_Prefix_Solution extends DP_Solution implements Comparable<DP_Pre
     	return this.latest_decision;
     }
 
+    public double get_final_cost()
+    {
+        return this.future_cost;
+    }
+
     /** 
      * A successor solution has the same length but replaces the last decision with an alternative
      * @param alt_decision The alternative decision
@@ -126,7 +131,7 @@ public class DP_Prefix_Solution extends DP_Solution implements Comparable<DP_Pre
     {
         // Following pointers to shorter prefixes
         // and accumulate the decisions that this prefix solution represents
-        List<Tuple> res = new ArrayList<Tuple>();
+        List<Tuple> res = new ArrayList<Tuple>(this.length);
         Tuple tuple;
         DP_Prefix_Solution current = this;
         while (current != null)
@@ -144,7 +149,7 @@ public class DP_Prefix_Solution extends DP_Solution implements Comparable<DP_Pre
     public List<Tuple> solutionToTuples_strict_order()
     {
         // Uses a stack to reverse the order and return them in the correct order
-        List<Tuple> res = new ArrayList<Tuple>();
+        List<Tuple> res = new ArrayList<Tuple>(this.length);
         // Use a stack to gather tuples as we go backwards to avoid inserting in the front of the string
         // When all tuples are gathered, start appending to the end of the list
         Deque<Tuple> stack = new ArrayDeque<Tuple>();
@@ -182,6 +187,18 @@ public class DP_Prefix_Solution extends DP_Solution implements Comparable<DP_Pre
     	if (this.future_cost < other.future_cost) return -1;
     	else if (this.future_cost > other.future_cost) return 1;
     	else return 0;
+    }
+
+    @Override
+    public boolean equals(Object obj) 
+    {
+        if (!(obj instanceof DP_Solution))
+            return false;
+        DP_Solution other = (DP_Solution) obj;
+        if ((obj instanceof DP_Prefix_Solution)) 
+            return this.solutionToTuples().equals(other.solutionToTuples());
+        else
+            return this.solutionToTuples_strict_order().equals(other.solutionToTuples_strict_order());
     }
 
 }

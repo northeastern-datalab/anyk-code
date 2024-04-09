@@ -1,0 +1,32 @@
+{
+    "query":
+    [
+      {
+        "relation_name": "R",
+        "relation_schema": ["A", "B", "Weight1"],
+        "weight_column": "Weight1",
+        "parent_name": "null",
+        "join_condition": [["null"]],
+        "file_name": "./relation_1.csv"
+      },
+  
+      {
+        "relation_name": "S",
+        "relation_schema": ["C", "D", "Weight2"],
+        "weight_column": "Weight2",
+        "parent_name": "R",
+        "join_condition": [["R.B = S.C"]],
+        "file_name": "./relation_1.csv"
+      },
+
+      {
+        "relation_name": "T",
+        "relation_schema": ["E", "F", "Weight3"],
+        "weight_column": "Weight3",
+        "parent_name": "S",
+        "join_condition": [["S.D = T.E"]],
+        "file_name": "./relation_2.csv"
+      }
+    ]
+  }
+  

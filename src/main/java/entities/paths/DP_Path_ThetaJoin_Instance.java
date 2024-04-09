@@ -11,6 +11,7 @@ import entities.Tuple;
 import factorization.Binary_Partitioning;
 import factorization.Equality;
 import factorization.Multiway_Partitioning;
+import factorization.Node_Connector;
 import factorization.Shared_Ranges;
 
 /** 
@@ -43,6 +44,7 @@ public class DP_Path_ThetaJoin_Instance extends DP_Problem_Instance
     {
         super();
         this.path_query = query;
+        Node_Connector.problem_setting = "DP";
 
         DP_State_Node new_node;
         Tuple right_tuple;
@@ -82,7 +84,7 @@ public class DP_Path_ThetaJoin_Instance extends DP_Problem_Instance
             // The join condition between the two relations is given in DNF form
             // To handle the disjunctions, construct a graph independently for each one
             for (List<Join_Predicate> conjunction : path_query.join_conditions.get(relation_index))
-                {
+            {
                 // Analyze the type of conjunction between the two relations to decide
                 // how the join will be handled
                 int ineq_cnt = 0, neq_cnt = 0, band_cnt = 0;

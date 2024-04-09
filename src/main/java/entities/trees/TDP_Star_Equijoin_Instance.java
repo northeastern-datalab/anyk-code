@@ -2,7 +2,6 @@ package entities.trees;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
@@ -28,14 +27,18 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
     */
 	Star_Equijoin_Query star_query;
 
+    /** 
+    * The bottom-up phase of T-DP creates a T-DP state/node for each tuple. 
+    * Every relation maps to a stage of T-DP.
+    * The starting node is artificial and the terminal nodes are implicit
+    * (To avoid the unnecessary overhead, we omit the terminal nodes).
+    * The cost of transitioning to a tuple is the cost of that tuple.
+    */
     public TDP_Star_Equijoin_Instance(Star_Equijoin_Query query)
     {
-        super(query.size + 1);
+        super();
         this.star_query = query;
-    }
 
-    public void bottom_up()
-    {
         TDP_State_Node new_node, node_same_key;
         Tuple child_tuple;
         List<TDP_State_Node> new_stage, prev_stage, joining_nodes;
@@ -45,10 +48,11 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
         HashMap<Double, TDP_State_Node> parent_hash;
         HashMap<Double, List<TDP_State_Node>> child_hash;
 
+        List<List<TDP_State_Node>> stages = new ArrayList<List<TDP_State_Node>>();
+
         // The number of stages is equal to the size of the star query
         // plus one starting stage (indexed by 0)
         int l = star_query.size;
-        stages_no = l;
 
         // To do the bottom-up traversal, just go from Rl to R1
         // We assume that the order of the indexes agrees with the tree order!!
@@ -65,7 +69,7 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
             // Just create state nodes for their tuples
             for (Tuple t : relation.tuples)
             {
-                new_node = new TDP_State_Node(sg, 0, t);
+                new_node = new TDP_State_Node(0, t);
                 // Set their cost equal to 0 (their cost is accounted for by the decision that leads to them)
                 new_node.set_to_terminal();
                 // No decisions to add
@@ -73,7 +77,7 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
             } 
             stages.add(new_stage);
             // These relations are leaf nodes, hence they have no children (empty list)
-            this.add_stage_to_tree(sg, new ArrayList<Integer>());
+            this.add_parent_stage_to_tree(sg, new ArrayList<Integer>());
         }
 
         // Build one hash table for each child relation
@@ -94,7 +98,7 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
         // Go through the tuples of R1 and join each one with the children using the hashes
         for (Tuple t : relation.tuples)
         {
-            new_node = new TDP_State_Node(sg, l - 1, t);
+            new_node = new TDP_State_Node(l - 1, t);
             // We have l-1 branches, go through each one separately
             for (int j = 2; j <= l; j++)
             {
@@ -125,15 +129,15 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
                         for (TDP_State_Node join_node : joining_nodes)
                         {
                             // For each one of them add a decision to the new node
-                            // Only if the child node can reach the terminal state
+                            // Only if the child node can reach all the terminal states
                             // If it cant, it is redundant and can be removed from the graph
                             // (we do not remove it, just leave it unconnected)
-                            if (join_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY)
+                            if (!join_node.is_dead_end())
                             {
                                 //System.out.println("Adding a decision from " + new_node + " to " + join_node);
                                 cost = ((Tuple) join_node.state_info).cost;
-                                new_node.add_decision(branch, join_node, cost);                                
-                            }
+                                new_node.add_decision(branch, join_node, cost);        
+                            }                        
                         }                        
                     }
                 }
@@ -146,40 +150,29 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
                 }
             }
             // After we are done with all branches, add the state to the stage only if 
-            // it is has non-infinite minimum achievable cost
-            if (new_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY) new_stage.add(new_node);
+            // it can reach all the terminal states
+            if (!new_node.is_dead_end()) new_stage.add(new_node);
             //System.out.println("Node " + new_node + " of R1 has min ach cost = " + new_node.get_subtree_opt_cost());
         }
         stages.add(new_stage);
         List<Integer> children_of_R1 = new ArrayList<Integer>();
         for (int j = 2; j <= l; j++) children_of_R1.add(j);
-        this.add_stage_to_tree(sg, children_of_R1);
+        this.add_parent_stage_to_tree(sg, children_of_R1);
 
         // Finally, instantiate the starting node and connect it to all the states of stage 1 that can reach the leaves
         // The starting node has no local information (null)
-        List<TDP_State_Node> starting_stage = new ArrayList<TDP_State_Node>();
-        starting_node = new TDP_State_Node(0, 1, null);
+        starting_node = new TDP_State_Node(1, null);
         prev_stage = new_stage;
         for (TDP_State_Node child_node : prev_stage)
         {
-            // If the opt_cost of the node is infinite, then it can't reach the terminal node, throw it away
-            if (child_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY)
-            {
-                //System.out.println("Adding " + child_node + " to starting node");
-                child_tuple = ((Tuple) child_node.state_info); // cast so that we can lookup the cost
-                starting_node.add_decision(0, child_node, child_tuple.cost);
-            }
-
+            //System.out.println("Adding " + child_node + " to starting node");
+            child_tuple = ((Tuple) child_node.state_info); // cast so that we can lookup the cost
+            starting_node.add_decision(0, child_node, child_tuple.cost);
         }
-        starting_stage.add(starting_node);
-        stages.add(starting_stage);
         // R0 has only R1 as a child in the tree
         List<Integer> children_of_R0 = new ArrayList<Integer>();
         children_of_R0.add(1);
-        this.add_stage_to_tree(0, children_of_R0);
-
-        // We added the stages in reverse order, fix
-        Collections.reverse(stages);
+        this.add_parent_stage_to_tree(0, children_of_R0);
     }
 
     /** 
@@ -229,7 +222,7 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
         TDP_Star_Equijoin_Instance instance = new TDP_Star_Equijoin_Instance(example_query);
         instance.bottom_up();
         // Print the cost of the optimal solution
-        System.out.println("Optimal cost = " + instance.starting_node.get_subtree_opt_cost());
+        System.out.println("Optimal cost = " + instance.starting_node.get_opt_cost());
 
         // Print the optimal solution
         System.out.print("Optimal solution:");
@@ -259,11 +252,11 @@ public class TDP_Star_Equijoin_Instance extends TDP_Problem_Instance
             System.out.println(instance.get_branch_index(sg));
         }
 
-        // Verify that tuples with the same join attribute values share the same decision objects
-        System.out.println("\nModifying the cost of the transition from R1:[4, 0, 0] to R2:[4, 2] its child to 1000");
-        System.out.println("Because decisions are shared, the cost of transitioning from R1:[4, 5, 6] to R2:[4, 2] should change too");
-        instance.stages.get(1).get(2).decisions.get(0).list_of_decisions.get(0).cost = 1000.0;
-        System.out.println("");
-        instance.print_edges();
+        // // Verify that tuples with the same join attribute values share the same decision objects
+        // System.out.println("\nModifying the cost of the transition from R1:[4, 0, 0] to R2:[4, 2] its child to 1000");
+        // System.out.println("Because decisions are shared, the cost of transitioning from R1:[4, 5, 6] to R2:[4, 2] should change too");
+        // instance.stages.get(1).get(2).decisions.get(0).list_of_decisions.get(0).cost = 1000.0;
+        // System.out.println("");
+        // instance.print_edges();
     }
 }

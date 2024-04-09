@@ -2,11 +2,13 @@ package entities.trees;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
 
+import algorithms.trees.TDP_Anyk_Iterator;
+import algorithms.trees.TDP_Eager;
+import algorithms.trees.Tree_BatchSorting;
 import data.BinaryRandomPattern;
 import data.Database_Query_Generator;
 import entities.Relation;
@@ -30,20 +32,17 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
 	Star_Equijoin_Query star_query;
 
     /** 
-     * For each tuple, we create a T-DP state. 
-     * Every relation maps to a stage of T-DP.
-     * The starting node is artificial and the terminal nodes are implicit
-     * (To avoid the unnecessary overhead, we omit the terminal nodes).
-     * The cost of transitioning to a tuple is the cost of that tuple.
+    * The bottom-up phase of T-DP creates a T-DP state/node for each tuple. 
+    * Every relation maps to a stage of T-DP.
+    * The starting node is artificial and the terminal nodes are implicit
+    * (To avoid the unnecessary overhead, we omit the terminal nodes).
+    * The cost of transitioning to a tuple is the cost of that tuple.
     */
     public TDP_BinaryStar_Equijoin_Instance(Star_Equijoin_Query query)
     {
-        super(query.size + 1);
+        super();
         this.star_query = query;
-    }
 
-    public void bottom_up()
-    {
         TDP_State_Node new_node, node_same_key;
         Tuple child_tuple;
         List<TDP_State_Node> new_stage, prev_stage, joining_nodes;
@@ -52,10 +51,11 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
         double cost, join_value_parent;
         HashMap<Double, List<TDP_State_Node>> child_hash;
 
+        List<List<TDP_State_Node>> stages = new ArrayList<List<TDP_State_Node>>();
+
         // The number of stages is equal to the size of the star query
         // plus one starting stage (indexed by 0)
         int l = star_query.size;
-        stages_no = l;
 
         // To do the bottom-up traversal, just go from Rl to R1
         // We assume that the order of the indexes agrees with the tree order!!
@@ -72,7 +72,7 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
             // Just create state nodes for their tuples
             for (Tuple t : relation.tuples)
             {
-                new_node = new TDP_State_Node(sg, 0, t);
+                new_node = new TDP_State_Node(0, t);
                 // Set their cost equal to 0 (their cost is accounted for by the decision that leads to them)
                 new_node.set_to_terminal();
                 // No decisions to add
@@ -80,7 +80,7 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
             } 
             stages.add(new_stage);
             // These relations are leaf nodes, hence they have no children (empty list)
-            this.add_stage_to_tree(sg, new ArrayList<Integer>());
+            this.add_parent_stage_to_tree(sg, new ArrayList<Integer>());
         }
 
         // Build one hash table for each child relation
@@ -99,7 +99,7 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
         // Go through the tuples of R1 and join each one with the children using the hashes
         for (Tuple t : relation.tuples)
         {
-            new_node = new TDP_State_Node(sg, l - 1, t);
+            new_node = new TDP_State_Node(l - 1, t);
 
             // All the relations join with the first attribute of R1
             join_value_parent = t.values[0];
@@ -131,15 +131,16 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
                         for (TDP_State_Node join_node : joining_nodes)
                         {
                             // For each one of them add a decision to the new node
-                            // Only if the child node can reach the terminal state
+                            // Only if the child node can reach all the terminal states
                             // If it cant, it is redundant and can be removed from the graph
                             // (we do not remove it, just leave it unconnected)
-                            if (join_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY)
+                            if (!join_node.is_dead_end())
                             {
                                 //System.out.println("Adding a decision from " + new_node + " to " + join_node);
                                 cost = ((Tuple) join_node.state_info).cost;
-                                new_node.add_decision(branch, join_node, cost);                                
+                                new_node.add_decision(branch, join_node, cost); 
                             }
+                               
                         }                        
                     }
                 }
@@ -156,40 +157,29 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
                 }     
             }            
             // After we are done with all branches, add the state to the stage only if 
-            // it is has non-infinite minimum achievable cost
-            if (new_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY) new_stage.add(new_node);
+            // it can reach all the terminal states
+            if (!new_node.is_dead_end()) new_stage.add(new_node);
             //System.out.println("Node " + new_node + " of R1 has min ach cost = " + new_node.get_subtree_opt_cost());
         }
         stages.add(new_stage);
         List<Integer> children_of_R1 = new ArrayList<Integer>();
         for (int j = 2; j <= l; j++) children_of_R1.add(j);
-        this.add_stage_to_tree(sg, children_of_R1);
+        this.add_parent_stage_to_tree(sg, children_of_R1);
 
         // Finally, instantiate the starting node and connect it to all the states of stage 1 that can reach the leaves
         // The starting node has no local information (null)
-        List<TDP_State_Node> starting_stage = new ArrayList<TDP_State_Node>();
-        starting_node = new TDP_State_Node(0, 1, null);
+        starting_node = new TDP_State_Node(1, null);
         prev_stage = new_stage;
         for (TDP_State_Node child_node : prev_stage)
         {
-            // If the opt_cost of the node is infinite, then it can't reach the terminal node, throw it away
-            if (child_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY)
-            {
-                //System.out.println("Adding " + child_node + " to starting node");
-                child_tuple = ((Tuple) child_node.state_info); // cast so that we can lookup the cost
-                starting_node.add_decision(0, child_node, child_tuple.cost);
-            }
-
+            //System.out.println("Adding " + child_node + " to starting node");
+            child_tuple = ((Tuple) child_node.state_info); // cast so that we can lookup the cost
+            starting_node.add_decision(0, child_node, child_tuple.cost);
         }
-        starting_stage.add(starting_node);
-        stages.add(starting_stage);
         // R0 has only R1 as a child in the tree
         List<Integer> children_of_R0 = new ArrayList<Integer>();
         children_of_R0.add(1);
-        this.add_stage_to_tree(0, children_of_R0);
-
-        // We added the stages in reverse order, fix
-        Collections.reverse(stages);
+        this.add_parent_stage_to_tree(0, children_of_R0);
     }
 
     // TODO: This is duplicated, find a way to reuse it.    
@@ -235,6 +225,35 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
     
     public static void main(String args[]) 
     {
+        // Database_Query_Generator gen = new BinaryRandomPattern(3, 4, 3, "star");
+        // gen.create();
+        // gen.print_database();
+        // List<Relation> db = gen.get_database();
+        // Star_Equijoin_Query query = new Star_Equijoin_Query(db);
+
+        // TDP_BinaryStar_Equijoin_Instance instance = new TDP_BinaryStar_Equijoin_Instance(query);
+        // instance.bottom_up();
+        // // Print the whole graph
+        // instance.print_edges();
+
+        // // Print the optimal solution
+        // System.out.println("Optimal cost: " + instance.starting_node.get_subtree_opt_cost());
+        // if (instance.starting_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY)
+        // {
+        //     System.out.print("Optimal solution:");
+        //     TDP_State_Node curr;
+        //     Queue<TDP_State_Node> q = new ArrayDeque<TDP_State_Node>();
+        //     q.offer(instance.starting_node);
+        //     while (!q.isEmpty())
+        //     {
+        //         curr = q.poll();
+        //         System.out.print(" " + curr);
+        //         for (TDP_State_Node child : curr.get_best_children()) q.offer(child);
+        //     }
+        //     System.out.println();
+        // }
+
+
         Database_Query_Generator gen = new BinaryRandomPattern(3, 4, 3, "star");
         gen.create();
         gen.print_database();
@@ -243,22 +262,40 @@ public class TDP_BinaryStar_Equijoin_Instance extends TDP_Problem_Instance
 
         TDP_BinaryStar_Equijoin_Instance instance = new TDP_BinaryStar_Equijoin_Instance(query);
         instance.bottom_up();
-        // Print the whole graph
-        instance.print_edges();
 
         // Print the optimal solution
-        System.out.print("Optimal solution:");
-        TDP_State_Node curr;
-        Queue<TDP_State_Node> q = new ArrayDeque<TDP_State_Node>();
-        q.offer(instance.starting_node);
-        while (!q.isEmpty())
+        System.out.println("Optimal cost: " + instance.starting_node.get_opt_cost());
+        if (instance.starting_node.get_opt_cost() != Double.POSITIVE_INFINITY)
         {
-            curr = q.poll();
-            System.out.print(" " + curr);
-            for (TDP_State_Node child : curr.get_best_children()) q.offer(child);
+            System.out.print("Optimal solution:");
+            TDP_State_Node curr;
+            Queue<TDP_State_Node> q = new ArrayDeque<TDP_State_Node>();
+            q.offer(instance.starting_node);
+            while (!q.isEmpty())
+            {
+                curr = q.poll();
+                System.out.print(" " + curr);
+                for (TDP_State_Node child : curr.get_best_children()) q.offer(child);
+            }
+            System.out.println();
         }
-        System.out.println();
+
+        System.out.println("Eager:");
+        TDP_Anyk_Iterator iter = new TDP_Eager(instance, null);
+        while (true)
+        {
+            TDP_Solution sol = iter.get_next();
+            if (sol != null) System.out.println(sol);
+            else break;
+        }
+
+        System.out.println("Batch:");
+        iter = new Tree_BatchSorting(instance, null);
+        while (true)
+        {
+            TDP_Solution sol = iter.get_next();
+            if (sol != null) System.out.println(sol);
+            else break;
+        }
     }
-
-
 }

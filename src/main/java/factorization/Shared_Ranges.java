@@ -1,11 +1,12 @@
 package factorization;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.javatuples.Pair;
 
 import entities.Join_Predicate;
-import entities.paths.DP_State_Node;
+import entities.State_Node;
 import util.Common;
 
 /** 
@@ -28,15 +29,15 @@ public class Shared_Ranges
      * @param right The second relation/stage as a list of DP state-nodes.
      * @param ps A list of equality predicates and a single inequality predicate at the end of the list.
      */
-    public static void factorize_inequality(List<DP_State_Node> left, List<DP_State_Node> right, List<Join_Predicate> ps)
+    public static void factorize_inequality(List<? extends State_Node> left, List<? extends State_Node> right, List<Join_Predicate> ps)
     {
         Join_Predicate inequality = ps.get(ps.size() - 1);
         // First take care of the equalities that precede the single inequality condition
-        for (Pair<List<DP_State_Node>,List<DP_State_Node>> equality_partition : 
+        for (Pair<List<? extends State_Node>,List<? extends State_Node>> equality_partition : 
                 Equality.split_by_equality(left, right, ps.subList(0, ps.size() - 1)))
         {
-            List<DP_State_Node> left_partition = equality_partition.getValue0();
-            List<DP_State_Node> right_partition = equality_partition.getValue1();
+            List<? extends State_Node> left_partition = equality_partition.getValue0();
+            List<? extends State_Node> right_partition = equality_partition.getValue1();
 
             // Sort before calling the recursive partitioning algorithm
             Common.sort_stage(left_partition, inequality.attr_idx_1);
@@ -55,9 +56,9 @@ public class Shared_Ranges
      * @param right The second (sorted) subset of a relation/stage.
      * @param inequality A single inequality predicate.
      */
-    private static void share_inequality(List<DP_State_Node> left, List<DP_State_Node> right, Join_Predicate inequality)
+    private static void share_inequality(List<? extends State_Node> left, List<? extends State_Node> right, Join_Predicate inequality)
     {
-        DP_State_Node cur_node, cur_intermediate, new_intermediate;
+        State_Node cur_node, cur_intermediate, new_intermediate;
         double cur_val;
         int left_idx = 0;
         int right_idx = 0;
@@ -80,8 +81,7 @@ public class Shared_Ranges
                 right_idx += 1;
                 if (right_idx >= right.size()) return;
             }
-            // Create the first intermediate node
-            cur_intermediate = new DP_State_Node(intermediate_cnt);
+            cur_intermediate = Node_Connector.create_intermediate_node(String.valueOf(intermediate_cnt));
             intermediate_cnt += 1;
 
             // Both indexes now point to the nodes that should next be accessed
@@ -104,13 +104,11 @@ public class Shared_Ranges
                     cur_node = left.get(left_idx);
                     if (visited_right)
                     {
-                        // Create a new intermediate node
-                        new_intermediate = new DP_State_Node(intermediate_cnt);
+                        // Create a new intermediate node and connect old intermediate to new intermediate
+                        new_intermediate = Node_Connector.connect_intermediate_nodes(cur_intermediate, null, String.valueOf(intermediate_cnt));
                         intermediate_cnt += 1;
-                        // Connect old intermediate to new intermediate
-                        cur_intermediate.add_decision(new_intermediate, 0.0);
                         // Connect current node to the new intermediate
-                        cur_node.add_decision(new_intermediate, 0.0);
+                        Node_Connector.connect_intermediate_nodes(cur_node, new_intermediate, null);
 
                         cur_intermediate = new_intermediate;
                         visited_right = false;
@@ -118,7 +116,7 @@ public class Shared_Ranges
                     else
                     {
                         // Connect this node to the current intermediate one
-                        cur_node.add_decision(cur_intermediate, 0.0);
+                        Node_Connector.connect_intermediate_nodes(cur_node, cur_intermediate, null);
                     }
                     left_idx += 1;
                 }
@@ -127,7 +125,7 @@ public class Shared_Ranges
                     cur_node = right.get(right_idx);
                     visited_right = true;
                     // Connect current intermediate to this node
-                    cur_intermediate.add_decision(cur_node, cur_node.toTuple().cost);
+                    Node_Connector.connect_intermediate_to_right(cur_intermediate, Arrays.asList(cur_node), null);
                     right_idx += 1;
                 }
                 else

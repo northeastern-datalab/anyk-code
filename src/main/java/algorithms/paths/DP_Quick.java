@@ -1,7 +1,6 @@
 package algorithms.paths;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
@@ -10,6 +9,7 @@ import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
 import entities.paths.DP_Problem_Instance;
+import util.Common;
 
 /** 
  * Quick is a variant of Anyk-Part that implements {@link #get_successors} 
@@ -36,7 +36,7 @@ public class DP_Quick extends DP_Part
     {
         // Initialize the successor lists
         for (DP_Decision dec : decisions.list_of_decisions)
-            dec.successors = new ArrayList<DP_Decision>();
+            dec.successors = new ArrayList<DP_Decision>(1);
 
         // Initialize the data structures needed for IQS
         decisions.pivot_stack = new Stack<Integer>();
@@ -76,7 +76,7 @@ public class DP_Quick extends DP_Part
             // Note that the 2nd argument is not inclusive (so we do +1)
             int pivot_idx = ThreadLocalRandom.current().nextInt(decision_set.next_idx, decision_set.pivot_stack.peek());
             // Partition according to the pivot, bringing it to the correct position
-            int new_pivot_idx = partition(decision_set.list_of_decisions, pivot_idx, decision_set.next_idx, decision_set.pivot_stack.peek() - 1);
+            int new_pivot_idx = Common.partition(decision_set.list_of_decisions, pivot_idx, decision_set.next_idx, decision_set.pivot_stack.peek() - 1);
             decision_set.pivot_stack.push(new_pivot_idx);
         }
 
@@ -89,32 +89,4 @@ public class DP_Quick extends DP_Part
 
         return res;
     }
-
-    // The element at index pivot_idx acts as a pivot
-    // Rearranges a[low, high] and returns the new position new_pivot_idx of the original pivot element
-    // In the rearranged array, all the elements smaller/larger than pivot appear before/after new_pivot_idx
-    // Based on the Lomuto partitioning scheme 
-    // https://www.geeksforgeeks.org/hoares-vs-lomuto-partition-scheme-quicksort/
-    private int partition(List<DP_Decision> a, int pivot_idx, int low, int high) 
-    {
-        DP_Decision pivot = a.get(pivot_idx);
-        // This scheme typically assumes that the pivot is the last element
-        // so here we swap the chosen (random) pivot with the high index and proceed as usual    
-        Collections.swap(a, high, pivot_idx);
-        
-        // Index of smaller element 
-        int i = low - 1; 
-      
-        for (int j = low; j <= high- 1; j++) 
-        { 
-            // If current element is smaller than or equal to pivot 
-            if (a.get(j).compareTo(pivot) <= 0) 
-            { 
-                i++; // increment index of smaller element 
-                Collections.swap(a, i, j);
-            } 
-        } 
-        Collections.swap(a, i + 1, high);
-        return (i + 1); 
-    } 
 }

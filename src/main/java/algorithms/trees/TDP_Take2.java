@@ -35,7 +35,7 @@ public class TDP_Take2 extends TDP_Part
     {
         // Initialize the successor lists
         for (TDP_Decision dec : decisions.list_of_decisions)
-            dec.successors = new ArrayList<TDP_Decision>();
+            dec.successors = new ArrayList<TDP_Decision>(2);
 
         // Build a heap with the decisions
         List<TDP_Decision> heap_of_decisions = heapify(decisions.list_of_decisions);

@@ -24,6 +24,7 @@ import data.Database_Query_Generator;
 import entities.Relation;
 import entities.trees.Star_Equijoin_Query;
 import entities.trees.TDP_BinaryStar_Equijoin_Instance;
+import entities.trees.TDP_Problem_Instance;
 import entities.trees.TDP_Solution;
 import util.DatabaseParser;
 import util.Measurements;
@@ -203,6 +204,12 @@ public class BinaryStar_Equijoin
         }
 
 
+        // ======= Warm-up phase =======
+        double dummy_counter = 0.0;  // to verify the computation is not removed by the compiler 
+        for (int i = 0; i < 10000; i++) 
+            dummy_counter += warm_up_star_equijoin(algorithm, conf);
+        System.out.println("Dummy counter = " + dummy_counter);
+
 
         // ======= Run =======
         Measurements measurements = new Measurements(sample_rate, max_k);
@@ -234,5 +241,38 @@ public class BinaryStar_Equijoin
         }         
         // Finalize and print everyting 
         measurements.print();
+    }
+
+    private static double warm_up_star_equijoin(String algorithm, Configuration conf)
+    {
+        double dummy_counter = 0;  // to verify the computation is not removed by the compiler
+        Database_Query_Generator gen = new BinaryRandomPattern(20, 4, 6, "star");
+        gen.create();
+        Star_Equijoin_Query query = new Star_Equijoin_Query(gen.get_database());
+        TDP_Problem_Instance instance = new TDP_BinaryStar_Equijoin_Instance(query);
+        instance.bottom_up();
+        TDP_Anyk_Iterator iter = null;
+        // Run any-k
+        if (algorithm.equals("Eager")) iter = new TDP_Eager(instance, conf);
+        else if (algorithm.equals("All")) iter = new TDP_All(instance, conf);
+        else if (algorithm.equals("Take2")) iter = new TDP_Take2(instance, conf);
+        else if (algorithm.equals("Lazy")) iter = new TDP_Lazy(instance, conf);
+        else if (algorithm.equals("Recursive")) iter = new TDP_Recursive(instance, conf);
+        else if (algorithm.equals("BatchSorting")) iter = new Tree_BatchSorting(instance, conf);
+        else if (algorithm.equals("Batch")) iter = new Tree_Batch(instance, conf);
+        else
+        {
+            System.err.println("Any-k algorithm not recognized.");
+            System.exit(1);
+        }
+
+        TDP_Solution solution;
+        while (true)
+        {
+            solution = iter.get_next();
+            if (solution == null) break;
+            dummy_counter += solution.solutionToTuples().get(0).values[0];
+        }         
+        return dummy_counter;
     }
 }

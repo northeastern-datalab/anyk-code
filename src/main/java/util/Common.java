@@ -12,8 +12,8 @@ import java.util.Set;
 import org.javatuples.Pair;
 
 import entities.Join_Predicate;
+import entities.State_Node;
 import entities.Tuple;
-import entities.paths.DP_State_Node;
 
 /** 
  * This class contains static methods that are generally useful and may be used by multiple other classes.
@@ -21,6 +21,64 @@ import entities.paths.DP_State_Node;
 */
 public class Common
 {
+    public static boolean is_conjunction_of_simple_equalities(List<List<Join_Predicate>> join_condition)
+    {
+        // Check if it is 1 conjunction
+        if (join_condition.size() != 1) return false;
+        for(Join_Predicate p : join_condition.get(0))
+        {
+            // Check if all the predicates are equalities
+            if (!p.type.equals("E")) return false;
+            // Check if the equality has an offset
+            if (p.parameter != null && p.parameter != 0) return false;
+        }
+        return true;
+    }
+
+    /**
+     * The element at index pivot_idx acts as a pivot.
+     * Rearranges a[low, high] and returns the new position new_pivot_idx of the original pivot element.
+     * In the rearranged array, all the elements smaller/larger than pivot appear before/after new_pivot_idx.
+     * Based on the Lomuto partitioning scheme https://www.geeksforgeeks.org/hoares-vs-lomuto-partition-scheme-quicksort/
+    **/
+    public static <E extends Comparable<E>> int partition(List<E> a, int pivot_idx, int low, int high) 
+    {
+        E pivot = a.get(pivot_idx);
+        // This scheme typically assumes that the pivot is the last element
+        // so here we swap the chosen (random) pivot with the high index and proceed as usual    
+        Collections.swap(a, high, pivot_idx);
+        
+        // Index of smaller element 
+        int i = low - 1; 
+      
+        for (int j = low; j <= high- 1; j++) 
+        { 
+            // If current element is smaller than or equal to pivot 
+            if (a.get(j).compareTo(pivot) <= 0) 
+            { 
+                i++; // increment index of smaller element 
+                Collections.swap(a, i, j);
+            } 
+        } 
+        Collections.swap(a, i + 1, high);
+        return (i + 1); 
+    } 
+
+    /** 
+     * Given an array of doubles, returns only the elements located at the specified indices.
+     * Creates a new array.
+     * @param oldArray The array to copy from.
+     * @param indices The indexes of the array to be kept.
+     * @return An ArrayList that contains only the specified elements.
+    */
+    public static double[] createSubarray(double[] oldArray, int[] indices)
+    {
+        double[] newArr = new double[indices.length];
+        for (int i = 0; i < indices.length; i++)
+            newArr[i] = oldArray[indices[i]]; 
+        return newArr;
+    }
+
     /** 
      * Given an array of doubles, returns only the elements located at the specified indices.
      * Creates a new list but doesn't perform a deep copy of the elements.
@@ -53,8 +111,8 @@ public class Common
 
     /** 
      * Binary search for the maximum element that is less than a max value
-     * on a stage of DP that corresponds to the tuples of a relation 
-     * (i.e., @link{entities.paths.DP_State_Node#state_info} is @link{entities.Tuple}).
+     * on a stage of (T-)DP that corresponds to the tuples of a relation 
+     * (i.e., @link{entities.paths.State_Node#state_info} is @link{entities.Tuple}).
      * The attribute whose value we are searching for is specified by its index.
      * @param stage The (sorted) list of nodes to be searched.
      * @param attr_index The index of the attributes that will be used for searching.
@@ -63,7 +121,7 @@ public class Common
      * @return The largest index whose value is less than (or equal to if inclusive) to the specified maximum value 
      *          or -1 if no element satisfies the requirement.
      */
-    public static int binary_search_max(List<DP_State_Node> stage, int attr_index, double max_val, boolean inclusive) 
+    public static int binary_search_max(List<? extends State_Node> stage, int attr_index, double max_val, boolean inclusive) 
     {
         double current_val;
         int comparison;
@@ -103,8 +161,8 @@ public class Common
 
     /** 
      * Binary search for the minimum element that is greater than a min value
-     * on a stage of DP that corresponds to the tuples of a relation 
-     * (i.e., @link{entities.paths.DP_State_Node#state_info} is @link{entities.Tuple}).
+     * on a stage of (T-)DP that corresponds to the tuples of a relation 
+     * (i.e., @link{entities.paths.State_Node#state_info} is @link{entities.Tuple}).
      * The attribute whose value we are searching for is specified by its index.
      * @param stage The (sorted) list of nodes to be searched.
      * @param attr_index The index of the attributes that will be used for searching.
@@ -113,7 +171,7 @@ public class Common
      * @return The smallest index whose value is greater than (or equal to if inclusive) to the specified minimum value
      *          or -1 if no element satisfies the requirement.
      */
-    public static int binary_search_min(List<DP_State_Node> stage, int attr_index, double min_val, boolean inclusive) 
+    public static int binary_search_min(List<? extends State_Node> stage, int attr_index, double min_val, boolean inclusive) 
     {
         double current_val;
         int comparison;
@@ -152,43 +210,43 @@ public class Common
     }
 
     /** 
-     * Sorts the nodes of a stage of DP that corresponds to the tuples of a relation 
-     * (i.e., @link{entities.paths.DP_State_Node#state_info} is @link{entities.Tuple}).
+     * Sorts the nodes of a stage of (T-)DP that corresponds to the tuples of a relation 
+     * (i.e., @link{entities.paths.State_Node#state_info} is @link{entities.Tuple}).
      * The attribute for sorting is specified by its index.
      * @param stage The stage to be sorted.
      * @param attr_index The index of the attributes that will be used for sorting.
      */
-    public static void sort_stage(List<DP_State_Node> stage, int attr_index)
+    public static void sort_stage(List<? extends State_Node> stage, int attr_index)
     {
         // Replace the sorting comparator with one that compares the attribute we want
-        Collections.sort(stage, new Comparator<DP_State_Node>() {
-        @Override
-        public int compare(DP_State_Node node1, DP_State_Node node2) 
-        {
-            return Double.valueOf(node1.toTuple().values[attr_index]).compareTo(node2.toTuple().values[attr_index]);           
-        }
+        Collections.sort(stage, new Comparator<State_Node>() {
+            @Override
+            public int compare(State_Node node1, State_Node node2) 
+            {
+                return Double.valueOf(node1.toTuple().values[attr_index]).compareTo(node2.toTuple().values[attr_index]);           
+            }
         });
     }
 
     /** 
-     * Hashes the nodes of a stage of DP that corresponds to the tuples of a relation 
-     * (i.e., @link{entities.paths.DP_State_Node#state_info} is @link{entities.Tuple}).
+     * Hashes the nodes of a stage of (T-)DP that corresponds to the tuples of a relation 
+     * (i.e., @link{entities.paths.State_Node#state_info} is @link{entities.Tuple}).
      * The key is a list of attributes of the tuples that are associated with the nodes.
      * @param stage The stage to be hashed.
      * @param join_attributes The indexes of the attributes that will be used as the key.
-     * @return HashMap<List<Double>, List<TDP_State_Node>>
+     * @return HashMap<List<Double>, List<State_Node>>
      */
-    public static HashMap<List<Double>, List<DP_State_Node>> hash_stage(List<DP_State_Node> stage, int[] join_attributes)
+    public static HashMap<List<Double>, List<State_Node>> hash_stage(List<? extends State_Node> stage, int[] join_attributes)
     {
         Tuple tup;
         List<Double> join_values;
-        List<DP_State_Node> node_list_same_key;
+        List<State_Node> node_list_same_key;
 
         // Each entry in the hashtable is a list of nodes
         // whose associated tuples share the same join attribute values
-        HashMap<List<Double>, List<DP_State_Node>> hash = 
-            new HashMap<List<Double>, List<DP_State_Node>>();
-        for (DP_State_Node node : stage)
+        HashMap<List<Double>, List<State_Node>> hash = 
+            new HashMap<List<Double>, List<State_Node>>();
+        for (State_Node node : stage)
         {
             tup = (Tuple) node.state_info; // get the tuple associated with the DP state
             join_values = Common.createSublist(tup.values, join_attributes);
@@ -197,7 +255,7 @@ public class Common
             {
                 // Key not present in hash table
                 // Initialize a list with the current node and add it to the hash table
-                node_list_same_key = new ArrayList<DP_State_Node>();
+                node_list_same_key = new ArrayList<State_Node>();
                 node_list_same_key.add(node);
                 hash.put(join_values, node_list_same_key);
             }
@@ -212,7 +270,7 @@ public class Common
     }
 
     /** 
-     * For 2 stages of DP that correspond to the tuples of relations,
+     * For 2 stages of (T-)DP that correspond to the tuples of relations,
      * splits the left-right tuples into multiple partitions according to the inequality condition attributes.
      * The left and right tuples have to be sorted beforehand and the number of distinct values has to be provided.
      * The resulting partitions satisfy the following:
@@ -228,12 +286,12 @@ public class Common
      * @param no_partitions The desired number of partitions.
      * @param max_values_per_partition The desired distinct values contained in each partition. 
      *                                  Any remaining ones will be assigned to the last partition.
-     * @return List<Pair<List<DP_State_Node>, List<DP_State_Node>>> A partitioning of the nodes as a list of left-right pairs.
+     * @return List<Pair<List<State_Node>, List<State_Node>>> A partitioning of the nodes as a list of left-right pairs.
      */
-    public static List<Pair<List<DP_State_Node>,List<DP_State_Node>>> 
-        split_by_distinct(List<DP_State_Node> left, List<DP_State_Node> right, Join_Predicate inequality, int no_partitions, int max_values_per_partition)
+    public static List<Pair<List<? extends State_Node>,List<? extends State_Node>>> 
+        split_by_distinct(List<? extends State_Node> left, List<? extends State_Node> right, Join_Predicate inequality, int no_partitions, int max_values_per_partition)
     {
-        List<Pair<List<DP_State_Node>,List<DP_State_Node>>> res = new ArrayList<Pair<List<DP_State_Node>,List<DP_State_Node>>>();
+        List<Pair<List<? extends State_Node>,List<? extends State_Node>>> res = new ArrayList<Pair<List<? extends State_Node>,List<? extends State_Node>>>();
 
         int idx_left = inequality.attr_idx_1;
         int idx_right = inequality.attr_idx_2;
@@ -250,7 +308,7 @@ public class Common
         if (right.size() > 0) next_val_right = right.get(0).toTuple().values[idx_right] + right_val_offset;
         int current_distinct_cnt = 0;
         Double last_val = null;
-        List<DP_State_Node> left_part, right_part;
+        List<? extends State_Node> left_part, right_part;
         boolean read_left;
 
         // Create all but the last partition via one scan of the nodes
@@ -273,7 +331,7 @@ public class Common
                     // Add the current partition to our result
                     left_part = left.subList(pstart_left, i);
                     right_part = right.subList(pstart_right, j);
-                    res.add(new Pair<List<DP_State_Node>,List<DP_State_Node>>(left_part, right_part));
+                    res.add(new Pair<List<? extends State_Node>,List<? extends State_Node>>(left_part, right_part));
                     // Reset the counter of distinct values
                     current_distinct_cnt = 0;
                     // Set the start of the next partition
@@ -307,13 +365,13 @@ public class Common
         // Handle the last partition
         left_part = left.subList(pstart_left, left.size());
         right_part = right.subList(pstart_right, right.size());
-        res.add(new Pair<List<DP_State_Node>,List<DP_State_Node>>(left_part, right_part));
+        res.add(new Pair<List<? extends State_Node>,List<? extends State_Node>>(left_part, right_part));
 
         return res;
     }
 
     /** 
-     * Given two stages of DP that correspond to relations, 
+     * Given two stages of (T-)DP that correspond to relations, 
      * counts the number of distinct values of the tuples.
      * The attributes whose values we want to count are specified by their indexes.
      * We also allow a real number to be added as an offset to the values of one of the stages.
@@ -324,12 +382,12 @@ public class Common
      * @param offset2 An offset to be added to the values of the second stage.
      */
     //TODO: make this more efficient by assuming that the stages have already been sorted
-    public static int count_distinct_vals(List<DP_State_Node> stage1, List<DP_State_Node> stage2, int idx1, int idx2, double offset2)
+    public static int count_distinct_vals(List<? extends State_Node> stage1, List<? extends State_Node> stage2, int idx1, int idx2, double offset2)
     {
         // Hash both stages on their corresponding attributes
         Set<Double> hash = new HashSet<Double>();
-        for (DP_State_Node node1 : stage1) hash.add(node1.toTuple().values[idx1]);
-        for (DP_State_Node node2 : stage2) hash.add(node2.toTuple().values[idx2] + offset2);
+        for (State_Node node1 : stage1) hash.add(node1.toTuple().values[idx1]);
+        for (State_Node node2 : stage2) hash.add(node2.toTuple().values[idx2] + offset2);
 
         // Count the number of elements in the hash set
         return hash.size();

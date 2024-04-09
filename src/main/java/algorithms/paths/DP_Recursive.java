@@ -56,9 +56,7 @@ public class DP_Recursive extends DP_Anyk_Iterator
         // The PQ has to be initialized with each decision concatenated with
         // the best suffix solution that begins from its target (determined recursively)
         List<DP_Decision> edges = curr_decisionSet.list_of_decisions;
-        ArrayList<DP_Suffix_Solution> candidates = new ArrayList<DP_Suffix_Solution>();
-        // An optimization to avoid many reallocations of the underlying array
-        candidates.ensureCapacity(edges.size());
+        ArrayList<DP_Suffix_Solution> candidates = new ArrayList<DP_Suffix_Solution>(edges.size());
         for (DP_Decision edge : edges)
         {
             DP_State_Node child = edge.target;

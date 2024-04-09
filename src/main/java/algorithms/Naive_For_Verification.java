@@ -9,6 +9,34 @@ import entities.paths.Path_ThetaJoin_Query;
 
 public class Naive_For_Verification 
 {
+    public static ArrayList<ArrayList<Tuple>> produce_all_result_tuples_4_onebranch_2attrs(List<Relation> database)
+    {
+        ArrayList<Tuple> result;
+        ArrayList<ArrayList<Tuple>> ret = new ArrayList<ArrayList<Tuple>>();
+        for (Tuple t1 : database.get(0).tuples)
+        {
+            for (Tuple t2 : database.get(1).tuples)
+            {
+                for (Tuple t3 : database.get(2).tuples)
+                {
+                    for (Tuple t4 : database.get(3).tuples)
+                    {
+                        if (t1.values[1] == t2.values[0] && t2.values[1] == t3.values[0] && t2.values[0] == t4.values[0])
+                        {
+                            result = new ArrayList<Tuple>();
+                            result.add(t1);
+                            result.add(t2);
+                            result.add(t3);
+                            result.add(t4);
+                            ret.add(result);
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
     public static ArrayList<ArrayList<Tuple>> produce_all_result_tuples_4_path_2attrs(List<Relation> database)
     {
         ArrayList<Tuple> result;

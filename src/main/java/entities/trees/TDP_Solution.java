@@ -48,6 +48,21 @@ public abstract class TDP_Solution// implements Bulk_Comparable
     {
         return this.cost;
     }
+
+    /** 
+     * @return double The finalcost of this solution. 
+     * If it is a partial *prefix* solution, then it is the cost that it can have when optimally expanded.
+     */
+    public abstract double get_final_cost();
+
+    /** 
+     * @return String
+     */
+    @Override
+    public String toString()
+    {
+        return this.solutionToString();
+    }
     
     /* DEPRECATED: Bulk_Comparable interface for batch inserts to a PQ
     public void set_group(Object group)

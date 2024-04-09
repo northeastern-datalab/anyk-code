@@ -11,18 +11,23 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import algorithms.Configuration;
+import algorithms.Yannakakis;
+import algorithms.YannakakisSorting;
 import algorithms.paths.DP_All;
 import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Eager;
 import algorithms.paths.DP_Lazy;
 import algorithms.paths.DP_Quick;
+import algorithms.paths.DP_QuickPlus;
 import algorithms.paths.DP_Recursive;
+import algorithms.paths.DP_Solution_Iterator;
 import algorithms.paths.DP_Take2;
 import algorithms.paths.Path_Batch;
 import algorithms.paths.Path_BatchSorting;
 import data.BinaryRandomPattern;
 import data.Database_Query_Generator;
 import entities.Relation;
+import entities.Tuple;
 import entities.paths.DP_Path_Equijoin_Instance;
 import entities.paths.DP_Solution;
 import entities.paths.Path_Equijoin_Query;
@@ -38,6 +43,92 @@ import util.Measurements;
 */
 public class Path_Equijoin
 {
+    static final int WARMUP_ITER = 10;
+    static final int RUN_ITER = 10;
+    static Configuration conf = null;
+    static Path_Equijoin_Query query = null;
+    static int max_k = -1;
+    static String algorithm;
+    static Measurements measurements = null;
+
+    public static void run()
+    {
+        if (algorithm.equals("Boolean"))
+        {
+            boolean res = query.boolean_query();
+            measurements.add_boolean(res);
+        }
+        else if (algorithm.equals("Yannakakis"))
+        {
+            Yannakakis yann = new Yannakakis(query);
+            Tuple t;
+            while (true)
+            {
+                t = yann.get_next();
+                if (t == null) break;
+                else measurements.add_k(t);
+            }
+        }
+        else if (algorithm.equals("YannakakisSorting"))
+        {
+            YannakakisSorting yann = new YannakakisSorting(query);
+            Tuple t;
+            while (true)
+            {
+                t = yann.get_next();
+                if (t == null) break;
+                else measurements.add_k(t);
+            }
+        }
+        else if (algorithm.equals("UnrankedEnum"))
+        {
+            DP_Path_Equijoin_Instance instance = new DP_Path_Equijoin_Instance(query);
+            DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
+            DP_Solution solution;
+            for (int k = 1; k <= max_k; k++)
+            {
+                solution = iter_unranked.get_next();
+                if (solution == null) break;
+                else measurements.add_k(solution.solutionToTuples());
+            }
+        }
+        else
+        {
+            DP_Path_Equijoin_Instance instance = new DP_Path_Equijoin_Instance(query);
+            instance.bottom_up();
+
+            // Return the first result in a uniform way (DP) for all algorithms
+            measurements.add_k(instance.get_best_solution());
+
+            DP_Anyk_Iterator iter = null;
+            // Run any-k
+            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
+            else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
+            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
+            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
+            else if (algorithm.equals("Quick")) iter = new DP_Quick(instance, conf);
+            else if (algorithm.equals("QuickPlus")) iter = new DP_QuickPlus(instance, conf);
+            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);
+            else if (algorithm.equals("BatchSorting")) iter = new Path_BatchSorting(instance, conf);
+            else if (algorithm.equals("Batch")) iter = new Path_Batch(instance, conf);
+            else
+            {
+                System.err.println("Algorithm not recognized.");
+                System.exit(1);
+            }
+    
+            DP_Solution solution;
+            iter.get_next();
+
+            for (int k = 2; k <= max_k; k++)
+            {
+                solution = iter.get_next();
+                if (solution == null) break;
+                else measurements.add_k(solution.solutionToTuples());
+            }         
+        }
+    }
+
     /**
 	 * Utility method for help messages.
      * @return String
@@ -113,21 +204,13 @@ public class Path_Equijoin
 
 
         // ======= Initialize parameters =======
-        Configuration conf = new Configuration();
-        Path_Equijoin_Query query = null;
-		DP_Path_Equijoin_Instance instance;
-        String input_file;
-        int n = -1;
-        int l = -1;
-        int domain = -1;
-        int arity = -1;
-        int max_k;
-        int sample_rate = -2;
+        int n, l = -1, arity, domain, sample_rate;
+        String input_file = null;
         if (cmd.hasOption("relationArity")) arity = Integer.parseInt(cmd.getOptionValue("relationArity"));
         else arity = 2;
         boolean self_join = false;
         if (cmd.hasOption("selfJoin")) self_join = true;
-        String algorithm = cmd.getOptionValue("algorithm"); 
+        algorithm = cmd.getOptionValue("algorithm"); 
         if (cmd.hasOption("numOfResults")) max_k = Integer.parseInt(cmd.getOptionValue("numOfResults")); 
         else max_k = Integer.MAX_VALUE;
         if (cmd.hasOption("downsample")) 
@@ -142,6 +225,7 @@ public class Path_Equijoin
                 domain = Integer.parseInt(cmd.getOptionValue("domain"));
                 double average_connections = n * 1.0 / domain;
                 estimated_result_size = n * (long) Math.pow(average_connections, l - 1);
+                System.out.print("estimated_result_size: " + estimated_result_size);
         	}
         	else
         	{
@@ -151,9 +235,11 @@ public class Path_Equijoin
             sample_rate = (int) Math.ceil(estimated_result_size / 500.0); 
         }
         else sample_rate = 1;
+        System.out.println("sample_rate: " + sample_rate);
         if (cmd.hasOption("heap type")) conf.set_heap_type(cmd.getOptionValue("heap type"));
+        conf = new Configuration();
 
-
+    
 
         // ======= Read the input =======
         if (cmd.hasOption("input")) 
@@ -214,42 +300,19 @@ public class Path_Equijoin
 
 
         // ======= Run =======
-        Measurements measurements = new Measurements(sample_rate, max_k);
-
-        if (algorithm.equals("Boolean"))
-        {
-            boolean res = query.boolean_query();
-            measurements.add_boolean(res);
-
-        }
-        else
-        {
-            instance = new DP_Path_Equijoin_Instance(query);
-            instance.bottom_up();
-
-            DP_Anyk_Iterator iter = null;
-            // Run any-k
-            if (algorithm.equals("Eager")) iter = new DP_Eager(instance, conf);
-            else if (algorithm.equals("All")) iter = new DP_All(instance, conf);
-            else if (algorithm.equals("Take2")) iter = new DP_Take2(instance, conf);
-            else if (algorithm.equals("Lazy")) iter = new DP_Lazy(instance, conf);
-            else if (algorithm.equals("Quick")) iter = new DP_Quick(instance, conf);
-            else if (algorithm.equals("Recursive")) iter = new DP_Recursive(instance, conf);
-            else if (algorithm.equals("BatchSorting")) iter = new Path_BatchSorting(instance, conf);
-            else if (algorithm.equals("Batch")) iter = new Path_Batch(instance, conf);
-            else
+        measurements = new Measurements(sample_rate, max_k);
+        for (int iter = 0; iter < WARMUP_ITER + RUN_ITER; iter++) 
+        {   
+            // Record measurements only after warm-up (throw away the previous ones)
+            if (iter == WARMUP_ITER)
             {
-                System.err.println("Any-k algorithm not recognized.");
-                System.exit(1);
-            }
-    
-            DP_Solution solution;
-            for (int k = 1; k <= max_k; k++)
-            {
-                solution = iter.get_next();
-                if (solution == null) break;
-                else measurements.add_k(solution.solutionToTuples());
-            }         
+                measurements.consume();
+                measurements = new Measurements(sample_rate, max_k);
+            } 
+            //System.out.println("<<<<< Starting any-k warm-up");
+            run();
+            measurements.start_new_run();
+            //System.out.println(">>>>> Stopped any-k warm-up");
         }
         // Finalize and print everyting 
         measurements.print();

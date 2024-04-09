@@ -31,7 +31,7 @@ public class DP_Take2 extends DP_Part
     {
         // Initialize the successor lists
         for (DP_Decision dec : decisions.list_of_decisions)
-            dec.successors = new ArrayList<DP_Decision>();
+            dec.successors = new ArrayList<DP_Decision>(2);
 
         // Build a heap with the decisions
         List<DP_Decision> heap_of_decisions = heapify(decisions.list_of_decisions);

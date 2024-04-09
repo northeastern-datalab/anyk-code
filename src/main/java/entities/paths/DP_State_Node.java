@@ -2,7 +2,7 @@ package entities.paths;
 
 import java.util.ArrayList;
 
-import entities.Tuple;
+import entities.State_Node;
 
 /** 
  * A state-node in the multi-stage DP graph constructed by {@link entities.paths.DP_Problem_Instance#bottom_up}.
@@ -10,24 +10,12 @@ import entities.Tuple;
  * For example, in join problems states represent database tuples.  
  * @author Nikolaos Tziavelis
 */
-public class DP_State_Node
+public class DP_State_Node extends State_Node
 {
-    /** 
-     * A flag that indicates whether this node is part of the last stage of DP.
-    */
-    public boolean terminal; 
     /** 
      * All the decisions that can be made at this state.
     */
     public DP_DecisionSet decisions;
-    /** 
-     * The minimum achievable cost starting from this node.
-    */    
-    private double opt_cost;
-    /** 
-     * Holds local information about the state, depends on the DP problem.
-    */
-    public Object state_info;
 
     /** 
      * Creates a new DP state.
@@ -37,11 +25,9 @@ public class DP_State_Node
     */
     public DP_State_Node(Object info)
     {
+        super(info);
         // Initially, we don't know the possible decisions and there is no way to reach the final state
         this.decisions = new DP_DecisionSet();
-        this.opt_cost = Double.POSITIVE_INFINITY;
-        this.state_info = info;
-        this.terminal = false;
     }
 
     // Use only for the terminal node
@@ -71,8 +57,7 @@ public class DP_State_Node
     
     /** 
      * Makes this state share the same decisions with another state.
-     * Useful e.g. for the equi-join when tuples share the same join values.
-     * Use only after the other state has finished adding decisions.
+     * Useful e.g., for the equi-join when tuples share the same join values.
      * @param other_state The state whose decisions will be copied to this one.
      */
     public void share_decisions(DP_State_Node other_state)
@@ -104,38 +89,6 @@ public class DP_State_Node
     {
         return this.decisions.list_of_decisions;
     }
-
-    /** 
-     * @return double The minimum achievable cost starting from this state.
-     */
-    public double get_opt_cost()
-    {
-        return this.opt_cost;
-    }
-
-    /** 
-     * @param opt_cost The minimum achievable cost starting from this state.
-     */
-    public void set_opt_cost(double opt_cost)
-    {
-        this.opt_cost = opt_cost;
-    }
-
-    /** 
-     * Sets the minimum achievable cost from this node to 0.
-     */
-    public void set_to_terminal()
-    {
-        this.terminal = true;
-    }
-
-    /** 
-     * @return boolean True if this node is part of the last stage of DP, False otherwise.
-     */
-    public boolean is_terminal()
-    {
-        return this.terminal;
-    }
     
     /** 
      * @return int The number of nodes that this node reaches in 1-hop.
@@ -155,16 +108,6 @@ public class DP_State_Node
         for (DP_Decision edge : decisions.list_of_decisions) children.add(edge.target);
         return children;
     }
-
-    /** 
-     * Returns the tuple that is contained inside the node.
-     * Only works for state-nodes that correspond to database tuples, will fail otherwise.
-     * @return Tuple The corresponding database tuple.
-     */
-    public Tuple toTuple()
-    {
-        return (Tuple) this.state_info;
-    }
     
     /** 
      * CAUTION: expensive operation, use only for debugging.
@@ -179,14 +122,4 @@ public class DP_State_Node
                 return edge.cost;
         return Double.POSITIVE_INFINITY;
     }
-    
-    /** 
-     * @return String
-     */
-    @Override
-    public String toString() 
-    {
-        if (state_info != null) return state_info.toString();
-        else return ""; 
-    } 
 }

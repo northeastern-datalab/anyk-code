@@ -7,7 +7,7 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import entities.Join_Predicate;
-import entities.paths.DP_State_Node;
+import entities.State_Node;
 import util.Common;
 
 /** 
@@ -31,7 +31,7 @@ public class Binary_Partitioning
      * @param right The second relation/stage as a list of DP state-nodes.
      * @param ps A conjunction of predicates with all the equalities at the start of the list.
      */
-    public static void factorize_conjunction(List<DP_State_Node> left, List<DP_State_Node> right, List<Join_Predicate> ps)
+    public static void factorize_conjunction(List<? extends State_Node> left, List<? extends State_Node> right, List<Join_Predicate> ps)
     {
         rec_step_id = 0;
         // First take care of the equalities that precede all the other conditions
@@ -46,12 +46,12 @@ public class Binary_Partitioning
         }
         equalities = ps.subList(0, eq_idx);
         rest = ps.subList(eq_idx, ps.size());
-        
-        for (Pair<List<DP_State_Node>,List<DP_State_Node>> equality_partition : 
+
+        for (Pair<List<? extends State_Node>,List<? extends State_Node>> equality_partition : 
                 Equality.split_by_equality(left, right, equalities))
         {
-            List<DP_State_Node> left_partition = equality_partition.getValue0();
-            List<DP_State_Node> right_partition = equality_partition.getValue1();
+            List<? extends State_Node> left_partition = equality_partition.getValue0();
+            List<? extends State_Node> right_partition = equality_partition.getValue1();
 
             factorize_next_condition(left_partition, right_partition, rest);
         }
@@ -65,17 +65,15 @@ public class Binary_Partitioning
      * @param right The second relation/stage as a list of DP state-nodes.
      * @param ps A nconjunction of (inequality/non-equality/band) predicates. 
      */
-    private static void factorize_next_condition(List<DP_State_Node> left, List<DP_State_Node> right, List<Join_Predicate> ps)
+    private static void factorize_next_condition(List<? extends State_Node> left, List<? extends State_Node> right, List<Join_Predicate> ps)
     {
         if (ps.isEmpty())
         {
             // Connect left to right
             // First materialize the intermediate node
             rec_step_id += 1;
-            DP_State_Node intermediate_node = new DP_State_Node("X" + rec_step_id);
-            // Then connect the two sublists with the intermedate node
-            for (DP_State_Node l : left) l.add_decision(intermediate_node, 0.0);
-            for (DP_State_Node r : right) intermediate_node.add_decision(r, r.toTuple().cost);
+            State_Node intermediate_node = Node_Connector.connect_left_to_intermediate(left, null, "X" + rec_step_id);
+            Node_Connector.connect_intermediate_to_right(intermediate_node, right, null);
         }
         else
         {
@@ -85,9 +83,9 @@ public class Binary_Partitioning
             // Sort before calling the recursive partitioning algorithm
             // To maintain the old sorted order (if this is not the first predicate),
             // create a new sorted list
-            List<DP_State_Node> copy_left = new ArrayList<DP_State_Node>(left);
+            List<State_Node> copy_left = new ArrayList<State_Node>(left);
             Common.sort_stage(copy_left, next.attr_idx_1);
-            List<DP_State_Node> copy_right = new ArrayList<DP_State_Node>(right);
+            List<State_Node> copy_right = new ArrayList<State_Node>(right);
             Common.sort_stage(copy_right, next.attr_idx_2);
 
             if (next.type.equals("IL") || next.type.equals("IG"))
@@ -105,7 +103,7 @@ public class Binary_Partitioning
             else if (next.type.equals("B"))
             {
                 // Translate the band into multiple inequalities
-                for (Triplet<Join_Predicate,List<DP_State_Node>,List<DP_State_Node>> ineq_group : 
+                for (Triplet<Join_Predicate,List<? extends State_Node>,List<? extends State_Node>> ineq_group : 
                     Band.band_grouping(copy_left, copy_right, next))
                 {
                     partition_inequality_rec(ineq_group.getValue1(), ineq_group.getValue2(), ineq_group.getValue0(), rest);
@@ -132,16 +130,16 @@ public class Binary_Partitioning
      * @param inequality A single inequality predicate.
      * @param remaining A list of other predicates.
      */
-    private static void partition_inequality_rec(List<DP_State_Node> left, List<DP_State_Node> right, 
+    private static void partition_inequality_rec(List<? extends State_Node> left, List<? extends State_Node> right, 
         Join_Predicate inequality, List<Join_Predicate> remaining)
     {
-        List<DP_State_Node> l1, l2, r1, r2;
+        List<? extends State_Node> l1, l2, r1, r2;
 
         int distinct_cnt = Common.count_distinct_vals(left, right, inequality.attr_idx_1, inequality.attr_idx_2, inequality.parameter);
         // Base Case
         if (distinct_cnt <= 1) return;
         // Make 2 partitions
-        List<Pair<List<DP_State_Node>,List<DP_State_Node>>> inequality_partitions = 
+        List<Pair<List<? extends State_Node>,List<? extends State_Node>>> inequality_partitions = 
             Common.split_by_distinct(left, right, inequality, 2, distinct_cnt / 2);
         l1 = inequality_partitions.get(0).getValue0();
         l2 = inequality_partitions.get(1).getValue0();

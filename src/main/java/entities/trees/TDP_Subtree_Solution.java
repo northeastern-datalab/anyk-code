@@ -68,8 +68,7 @@ public class TDP_Subtree_Solution extends TDP_Solution implements Comparable<TDP
         // the collection might be incomplete at this point
         // In that case, we assume that they will be expanded optimally and we use their future optimal cost
         //System.out.println("Creating " + this.solutionToString());
-        double future_cost = parent_decision.target.lawler_future_costs.get(subtrees.size);
-        this.cost = parent_decision.cost + subtrees.cost + future_cost;
+        this.cost = parent_decision.cost + subtrees.cost + parent_decision.target.lawler_future_costs[subtrees.size];
         // The subtree collection will be expanded and reassigned by Lawler
         // This field will show us the stages for which we need to take successors
         this.last_sidetrack = subtrees.size - 1;
@@ -113,6 +112,11 @@ public class TDP_Subtree_Solution extends TDP_Solution implements Comparable<TDP
         this.subtrees = subtrees;
     }
 
+    public double get_final_cost()
+    {
+        return this.cost;
+    }
+
     /** 
      * Uses a DFS traversal.
      * @return String A string representation of the solution. 
@@ -120,7 +124,6 @@ public class TDP_Subtree_Solution extends TDP_Solution implements Comparable<TDP
     public String solutionToString()
     {
         List<TDP_Subtree_Solution> children_solutions;
-        String s;
     	StringBuilder builder = new StringBuilder();
         TDP_Subtree_Solution current;
         Deque<TDP_Subtree_Solution> stack = new ArrayDeque<TDP_Subtree_Solution>();
@@ -129,8 +132,7 @@ public class TDP_Subtree_Solution extends TDP_Solution implements Comparable<TDP
     	while (!stack.isEmpty())
     	{
             current = stack.pop();
-    		s = current.parent_decision.target.toString();
-            builder.append(s);
+            builder.append(current.parent_decision.target.toString());
             // Push to the stack in reverse order to preserve the ordering
             children_solutions = current.get_shorter_subtree_solutions();
             for (TDP_Subtree_Solution child : children_solutions) stack.push(child);
@@ -146,7 +148,6 @@ public class TDP_Subtree_Solution extends TDP_Solution implements Comparable<TDP
     {
         List<TDP_Subtree_Solution> children_solutions;
         List<Tuple> res = new ArrayList<Tuple>();
-        Tuple tuple;
         TDP_Subtree_Solution current;
         Deque<TDP_Subtree_Solution> stack = new ArrayDeque<TDP_Subtree_Solution>();
         stack.push(this);
@@ -154,8 +155,10 @@ public class TDP_Subtree_Solution extends TDP_Solution implements Comparable<TDP
     	while (!stack.isEmpty())
     	{
             current = stack.pop();
-            tuple = (Tuple) current.parent_decision.target.state_info;
-            res.add(tuple);
+            if (current.parent_decision.target.state_info instanceof Tuple)
+            {
+                res.add((Tuple) current.parent_decision.target.state_info);
+            }
             children_solutions = current.get_shorter_subtree_solutions();
             for (TDP_Subtree_Solution child : children_solutions) stack.push(child);
     	}

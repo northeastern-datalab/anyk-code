@@ -21,18 +21,13 @@ public class DP_Eager extends DP_Part
 	public DP_Eager(DP_Problem_Instance inst, Configuration conf)
     {
     	super(inst, conf);
-
-        // Deprecated - initialization happens on the fly
-        // Sort all the decision sets
-        // To find them, traverse the DP graph in a DFS manner
-        // initialize_partial_order_DFS(instance.starting_node);
     }
     
     public void initialize_partial_order(DP_DecisionSet decisions)
     {
         // Initialize the successor lists
         for (DP_Decision dec : decisions.list_of_decisions)
-            dec.successors = new ArrayList<DP_Decision>();
+            dec.successors = new ArrayList<DP_Decision>(1);
 
         // For each node, we sort all decisions and then store a pointer for each decision according to the sorted order
         ArrayList<DP_Decision> list_of_decisions = decisions.list_of_decisions;

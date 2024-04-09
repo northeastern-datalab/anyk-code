@@ -65,7 +65,7 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
         {
             TDP_State_Node child = edge.target;
 
-            if (instance.get_children_no(child.stage) == 0) 
+            if (child.is_terminal()) 
             {
                 // After edge, we arrive at a leaf stage
                 cand = new TDP_Subtree_Solution(edge);
@@ -99,18 +99,21 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
         // for the Lawler procedure so that we don't have to do it eagerly at the start of the algorithm
         if (curr_node.lawler_future_costs == null)
         {
-            List<Double> future_costs = new ArrayList<Double>();
-            double c = curr_node.get_subtree_opt_cost();
-            for (Double branch_opt_cost : curr_node.branches_opt_cost)
+            double[] future_costs = new double[curr_node.decisions.size() + 1];
+            double c = curr_node.get_opt_cost();
+            int idx = 0;
+            for (TDP_DecisionSet decisions : curr_node.decisions)
             {
+                double branch_opt_cost = decisions.best_decision.opt_achievable_cost();
                 // The future cost of the remaining branches in the iteration is the total minimum achievable cost
                 // minus the minimum achievable costs of the branches we have already seen
-                future_costs.add(c);
+                future_costs[idx] = c;
                 c -= branch_opt_cost;
+                idx += 1;
             }
             // Add one more zero entry to avoid index out of bounds
             // This means that the future cost of a complete prefix is 0.0
-            future_costs.add(0.0);
+            future_costs[idx] = 0.0;
             curr_node.lawler_future_costs = future_costs;
         }
 
@@ -139,12 +142,12 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
 
         // If we have come at this node before, then the best subtree solution has already been constructed
         // In that case, just return it
-        if (curr_decision_set.rea_best_subtree != null) return curr_decision_set.rea_best_subtree;
+        if (curr_decision_set.rec_best_subtree != null) return curr_decision_set.rec_best_subtree;
 
         // Compute the best subtree solution recursively
         // First we follow the best decision in that branch
         TDP_Decision best_decision = curr_decision_set.best_decision;
-        if (instance.get_children_no(best_decision.target.stage) == 0) 
+        if (best_decision.target.is_terminal()) 
         {
             // After best_decision, we arrive at a leaf stage
             res = new TDP_Subtree_Solution(best_decision);
@@ -160,7 +163,7 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
         }
 
         // Remember this result for fast future lookups
-        curr_decision_set.rea_best_subtree = res;
+        curr_decision_set.rec_best_subtree = res;
 
         //System.out.print("The Pi_1 from " + curr_node + " (branch " + branch + " is : ");
         //System.out.println(res.solutionToString());
@@ -196,8 +199,7 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
      */
     private TDP_Subtree_Solution find_next_recursive(TDP_Subtree_Solution curr)
     {
-        TDP_Subtree_Solution next_from_child, new_rea_candidate;
-        TDP_Subtree_Collection lawler_successor;
+        TDP_Subtree_Solution next_from_child;
 
         // If we have already computed the next of this solution, just return it
         if (curr.next == null)
@@ -205,8 +207,6 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
             // Split the solution in its parts
             TDP_Decision parent_decision = curr.get_parent_decision();
             TDP_Subtree_Collection curr_subtrees = curr.get_shorter_subtree_collection();
-            TDP_State_Node parent = parent_decision.target;
-            int no_branches = instance.get_children_no(parent.stage); 
 
             // Find the PQ that the parent decision belongs to
             TDP_DecisionSet curr_decisionSet = parent_decision.belongs_to();
@@ -221,16 +221,15 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
             pq.poll();
 
             // Generate new candidates according to the Lawler procedure
-            for (int i = no_branches - 1; i >= curr.last_sidetrack; i--)
+            for (int i = parent_decision.target.decisions.size() - 1; i >= curr.last_sidetrack; i--)
             {
                 // Take the successor for branch i
                 // Recursive call
                 next_from_child = find_next_recursive(curr_subtrees.last_solution);
                 if (next_from_child != null)
                 {
-                    lawler_successor = curr_subtrees.create_successor(next_from_child);
-                    new_rea_candidate = new TDP_Subtree_Solution(parent_decision, lawler_successor);
-                    pq.add(new_rea_candidate);
+                    // Lawler successor
+                    pq.add(new TDP_Subtree_Solution(parent_decision, curr_subtrees.create_successor(next_from_child)));
                 }       
                 curr_subtrees = curr_subtrees.prefix;
             }
@@ -255,17 +254,13 @@ public class TDP_Recursive extends TDP_Anyk_Iterator
     {
         if (sol == null) return;
 
-        TDP_Subtree_Solution best_child;
-
         TDP_State_Node parent = sol.get_parent_decision().target;
         TDP_Subtree_Collection curr_subtrees = sol.get_shorter_subtree_collection();
-        int no_branches = instance.get_children_no(parent.stage); 
 
-        while (curr_subtrees.size < no_branches)
+        while (curr_subtrees.size < parent.decisions.size())
         {
             // Expand once by appending the Pi_1 from the next child
-            best_child = get_best_subtree_solution(parent, curr_subtrees.size);
-            curr_subtrees = new TDP_Subtree_Collection(curr_subtrees, best_child);       
+            curr_subtrees = new TDP_Subtree_Collection(curr_subtrees, get_best_subtree_solution(parent, curr_subtrees.size));       
         }
         // Assign the expanded prefix to the current solution
         sol.set_shorter_subtree_collection(curr_subtrees);

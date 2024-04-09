@@ -29,7 +29,7 @@ public class TDP_Lazy extends TDP_Part
     {
         // Initialize the successor lists
         for (TDP_Decision dec : decisions.list_of_decisions)
-            dec.successors = new ArrayList<TDP_Decision>();
+            dec.successors = new ArrayList<TDP_Decision>(1);
 
         // Initialize a PQ for this decision set and insert all the decisions except the best one
         // To do this efficiently, build the entire heap and pop once

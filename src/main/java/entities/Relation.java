@@ -71,6 +71,22 @@ public class Relation
     }
     
     /** 
+     * @return String The contents of the relation in string format without the printing the tuple costs
+     */
+    public String toString_no_cost()
+    {
+        StringBuilder str = new StringBuilder();
+        str.append("Relation " + this.relation_id + "\n");
+        for (String attribute : this.schema)
+            str.append(attribute + " ");
+        str.append("\n");
+        for (Tuple t : this.tuples)
+            str.append(t.flat_format_no_cost() + "\n");
+        str.append("End of " + this.relation_id + "\n");
+        return str.toString();
+    }
+
+    /** 
      * @return String The contents of the relation in string format
      */
     @Override

@@ -1,6 +1,8 @@
 package util;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import entities.Tuple;
@@ -12,20 +14,14 @@ import entities.Tuple;
 public class Measurements 
 {
     /** 
-     * To make sure the results are really computed and the compiler doesn't skip anything,
-     * we keep a small subset (100) of the most recent results at all times.
-     * At the end of the computation {@link #print} adds the values of the tuples of the small result set and prints it. 
+     * This counter adds up the result values to make sure they are computed.
     */
-    private List<List<Tuple>> results;
-    /** 
-     * This counter adds up the result values.
-    */
-    private long dummy_counter;
+    private int dummy_counter;
 
     /** 
      * For each sampled time point, we record the time.
     */
-    private List<Double> time_list;
+    private List<List<Double>> time_list;
     /** 
      * For each sampled time point, we record the memory.
     */
@@ -40,6 +36,15 @@ public class Measurements
     */
     private int sample_rate;
 
+    /** 
+     * Keeps track of how many times we have run the algorithm.
+    */
+    private int runs;
+    /** 
+     * The number of iterations of the algorithm we have recorded.
+    */
+    private int record_iters;
+
     private int k, max_k;
     // For timing
     private long startTime;
@@ -47,7 +52,7 @@ public class Measurements
 
     public Measurements(int sample_rate, int max_k)
     {
-        this.time_list = new ArrayList<Double>();
+        this.time_list = new ArrayList<List<Double>>();
         this.memory_list = new ArrayList<String>();
         this.k_list = new ArrayList<Integer>();
 
@@ -55,8 +60,26 @@ public class Measurements
         this.k = 1;
         this.max_k = max_k;
         this.dummy_counter = 0;
-        this.results = new ArrayList<List<Tuple>>(100);
-        for (int i = 0; i < 100; i++) this.results.add(new ArrayList<Tuple>());
+
+        this.runs = 1;
+        this.record_iters = 0;
+
+        // Clear the memory (hopefully)
+        System.gc();
+
+        // Initialize time
+        this.elapsedTime = 0.0;
+        this.startTime = System.nanoTime();
+    }
+
+    /** 
+     * Use this method whenever a new ranked enumeration algorithm starts.
+    */
+    public void start_new_run()
+    {
+        this.k = 1;
+        this.runs += 1;
+        this.record_iters = 0;
 
         // Clear the memory (hopefully)
         System.gc();
@@ -72,15 +95,20 @@ public class Measurements
     */
     public void add_k(List<Tuple> result)
     {
-        // Add the result to a small result subset, possibly overriding a previous one
-        this.results.set(k % 100, result);
+        for (Tuple t : result) dummy_counter += t.values[0];
 
         if (k % sample_rate == 0 || k == 1 || k == max_k) 
         {
             elapsedTime += (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            this.k_list.add(k);
-            time_list.add(elapsedTime);
-            memory_list.add(get_memory());
+            if (this.runs == 1) 
+            {
+                this.k_list.add(k);
+                this.time_list.add(new ArrayList<Double>());
+                this.memory_list.add(get_memory());
+            }
+            this.time_list.get(record_iters).add(elapsedTime);
+            
+            this.record_iters += 1;
             startTime = System.nanoTime();
         }
         k += 1;
@@ -92,15 +120,20 @@ public class Measurements
     */
     public void add_k(Tuple result)
     {
-        // We don't want to keep all the solutions, just add the value to a counter
         dummy_counter += result.values[0];
 
         if (k % sample_rate == 0 || k == 1 || k == max_k) 
         {
             elapsedTime += (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            this.k_list.add(k);
-            time_list.add(elapsedTime);
-            memory_list.add(get_memory());
+            if (this.runs == 1) 
+            {
+                this.k_list.add(k);
+                this.time_list.add(new ArrayList<Double>());
+                this.memory_list.add(get_memory());
+            }
+            this.time_list.get(record_iters).add(elapsedTime);
+            
+            this.record_iters += 1;
             startTime = System.nanoTime();
         }
         k += 1;
@@ -119,9 +152,15 @@ public class Measurements
         if (k % sample_rate == 0 || k == 1 || k == max_k) 
         {
             elapsedTime += (double) (System.nanoTime() - startTime) / 1_000_000_000.0;
-            this.k_list.add(k);
-            time_list.add(elapsedTime);
-            memory_list.add(get_memory());
+            if (this.runs == 1) 
+            {
+                this.k_list.add(k);
+                this.time_list.add(new ArrayList<Double>());
+                this.memory_list.add(get_memory());
+            }
+            this.time_list.get(record_iters).add(elapsedTime);
+            
+            this.record_iters += 1;
             startTime = System.nanoTime();
         }
         k += 1;
@@ -131,41 +170,33 @@ public class Measurements
      * Prints out (in the standard output) the measurements that have been sampled from the execution.
     */
     public void print()
-    {
-        // Add the results to the dummy counter so that we are sure that they are computed
-        for (List<Tuple> result : this.results)
-        {
-            for (Tuple t : result) dummy_counter += t.values[0];
-        }
-            
+    {          
         // Print out the information stored in the lists of the class
         for (int i = 0; i < time_list.size(); i++)
         {
-            System.out.println("k= " + k_list.get(i) +" Time= " + time_list.get(i) + " sec");
+            System.out.println("k= " + k_list.get(i) +" Time= " + median(time_list.get(i)) + " sec");
             System.out.println(memory_list.get(i));
         }
-        System.out.println("Dummy counter = " + dummy_counter);
+        System.out.println("(Ignore) Dummy counter = " + dummy_counter);
     }
 
     /** 
-     * Prints out (in the standard output) in csv format
+     * Prints out in csv format
      * the measurements that have been sampled from the execution.
     */
-    public void print_to_csv()
-    {
-        // Add the results to the dummy counter so that we are sure that they are computed
-        for (List<Tuple> result : this.results)
-        {
-            for (Tuple t : result) dummy_counter += t.values[0];
-        }
-            
-        System.out.println("ResultNumber Time(sec)");
+    public void print_to_csv_file(String path_to_timings_file) throws IOException
+    { 
+        OpenCsvWriter openCsv = new OpenCsvWriter(path_to_timings_file);
+        openCsv.writeLine("ResultNumber Time(sec)");
         // Print out the information stored in the lists of the class
         for (int i = 0; i < time_list.size(); i++)
         {
-            System.out.println(k_list.get(i) + " " + time_list.get(i));
+            openCsv.writeLine(k_list.get(i) + " " + median(time_list.get(i)));
         }
-        System.err.println("Dummy counter = " + dummy_counter);
+        System.err.println("(Ignore) Dummy counter = " + dummy_counter);
+
+        openCsv.flushWriter();
+        openCsv.closeWriter();
     }
 
     /** 
@@ -179,5 +210,28 @@ public class Measurements
         long free = rt.freeMemory();
         long used = total - free;
         return "TotalMem: " + total + " FreeMem: " + free + " UsedMem: " + used + " (Bytes)";
+    }
+
+    public static double median(List<Double> list) 
+    {
+        Collections.sort(list);
+        if (list.size() % 2 != 0) return list.get(list.size() / 2);
+        return (list.get(list.size() / 2) + list.get((list.size() - 1) / 2)) / 2.0;
+    }
+
+    /** 
+     * Prints out (in the standard output) seomthing to make sure the compiler has not eliminated the code.
+    */
+    public void consume()
+    {          
+        // Print out the information stored in the lists of the class
+        for (int i = 0; i < time_list.size(); i++)
+        {
+            dummy_counter += median(time_list.get(i));
+            dummy_counter += Double.parseDouble(memory_list.get(i).split(" ")[1]);
+            dummy_counter += Double.parseDouble(memory_list.get(i).split(" ")[3]);
+            dummy_counter += Double.parseDouble(memory_list.get(i).split(" ")[5]);
+        }
+        System.out.println("(Ignore) Dummy counter = " + dummy_counter);
     }
 }

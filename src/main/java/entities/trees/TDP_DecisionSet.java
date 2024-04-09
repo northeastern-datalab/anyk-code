@@ -1,7 +1,9 @@
 package entities.trees;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Stack;
 
 /** 
  * Class that represents a set of decisions (edges) in the tree-staged graph of T-DP.
@@ -31,6 +33,26 @@ public class TDP_DecisionSet
      * A priority queue that is used to incrementally sort the set of decisions by {@link algorithms.trees.TDP_Lazy}.
     */ 
     public PriorityQueue<TDP_Decision> pq_lazysort;
+    /** 
+     * A stack that stores the indexes of the pivot elements used by {@link algorithms.paths.TDP_Quick}.
+    */    
+    public Stack<Integer> pivot_stack;
+    /** 
+     * The index in the sorted list of decisions of the next element to be found by {@link algorithms.paths.TDP_Quick}.
+    */ 
+    public int next_idx;
+    /** 
+     * For {@link algorithms.trees.TDP_PartPlus}: 
+	 * Stores the sorted order of suffixes (each suffix is a list of decisions) starting from a DecisionSet.
+	 * Note that a decision from the DecisionSet itself *is* contained in the suffix.
+	*/
+    public List<TDP_Suffix_Solution> sorted_suffixes;
+    /** 
+	 * For {@link algorithms.trees.TDP_PartPlus}: 
+     * A list of prefixes that are subscribed and waiting for the next suffix to be inserted in the sorted list.
+     * Note that a decision from the DecisionSet itself is *not* contained in the prefix.
+	*/
+    public List<TDP_Prefix_Solution_Follower> subscribers;  
 
     /** 
      * PQ data structure used by {@link algorithms.trees.TDP_Recursive}.
@@ -39,36 +61,21 @@ public class TDP_DecisionSet
     /** 
      * Needed for {@link algorithms.trees.TDP_Recursive} (includes a decision from this set).
     */
-    public TDP_Subtree_Solution rea_best_subtree;
+    public TDP_Subtree_Solution rec_best_subtree;
 
     public TDP_DecisionSet()
     {
-        list_of_decisions = new ArrayList<TDP_Decision>();
-        partial_order_computed = false;
-        pq_rec = null;
-        rea_best_subtree = null;
+        this.list_of_decisions = new ArrayList<TDP_Decision>();
+        this.partial_order_computed = false;
+        this.pq_rec = null;
+        this.rec_best_subtree = null;
     }
 
     /** 
-     * Adds a decision to the set.
-     * If the minimum achievable cost with this decision is better than the current ones, 
-     * update best_decision.
      * @param new_decision Decision to be added to the set.
-     * @return int If best_decision is updated, returns 1, else returns 0.
      */
-    public int add(TDP_Decision new_decision)
+    public void add(TDP_Decision new_decision)
     {
-        list_of_decisions.add(new_decision);
-        if (this.best_decision == null)
-        {
-            this.best_decision = new_decision;
-            return 1;
-        } 
-        else if (new_decision.compareTo(this.best_decision) < 0) 
-        {
-            best_decision = new_decision;
-            return 1;
-        }
-        return 0;
+        this.list_of_decisions.add(new_decision);
     }
 }

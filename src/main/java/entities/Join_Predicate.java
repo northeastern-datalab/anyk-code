@@ -4,7 +4,7 @@ package entities;
  * A join predicate is a boolean formula that specifies a condition that needs to hold 
  * in order for 2 tuples (1 from each relation) to be joinable.
  * We assume that all predicates are binary, hence they refer to 1 attribute from each relation.
- * We also allow to a real number to be added to the second attribute for most types of conditions.
+ * We also allow a real number to be added to the second attribute for most types of conditions.
  * @author Nikolaos Tziavelis
 */
 public class Join_Predicate
@@ -30,6 +30,12 @@ public class Join_Predicate
     */
     public Double parameter;
 
+    /** 
+     * @param type Can be E/IL/IG/N/B.
+     * @param attr_idx_1 The index of the attribute in the schema of the parent relation.
+     * @param attr_idx_2 The index of the attribute in the schema of the child relation.
+     * @parameter Meaning depends on type.
+     */
     public Join_Predicate(String type, int attr_idx_1, int attr_idx_2, Double parameter)
     {
         this.type = type;

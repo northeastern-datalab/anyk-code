@@ -30,6 +30,11 @@ public class Tree_Query_Solution extends TDP_Solution implements Comparable<Tree
         }
     }
 
+    public double get_final_cost()
+    {
+        return this.cost;
+    }
+
     public String solutionToString()
     {
         return tuple_list.toString();

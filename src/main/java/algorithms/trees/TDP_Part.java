@@ -77,7 +77,7 @@ public abstract class TDP_Part extends TDP_Anyk_Iterator
 		this.global_pq = new PriorityQueue<TDP_Prefix_Solution>();
     	// The prefix we start with contains only the best decision to go from starting_node to stage 1
     	// That way, we guarantee that for top-2 we start taking successor solutions from stage 1
-    	if (instance.starting_node.get_subtree_opt_cost() != Double.POSITIVE_INFINITY)	// Corner case: if no path can reach the terminal node, leave the pq empty
+    	if (instance.starting_node.get_opt_cost() != Double.POSITIVE_INFINITY)	// Corner case: if no path can reach the terminal node, leave the pq empty
     	{
             // Stage 0 always has only one branch (index 0) that corresponds to stage 1
             TDP_Decision best_from_start = instance.starting_node.get_best_decision(0);
@@ -102,7 +102,7 @@ public abstract class TDP_Part extends TDP_Anyk_Iterator
     		// We have to generate successor solutions for all stages which are between 
     		// the last stage and the stage where the latest solution made its final sidetrack (indicated by its length)
     		curr = latest_solution;
-    		for (int sg = stages_no; sg >= latest_sidetrack_stage; sg--)
+    		for (int sg = stages_no - 1; sg >= latest_sidetrack_stage; sg--)
     		{
     			// In stage sg, we take the successors of decisions between sg-1 and sg
     			// We consider the successors of the latest decision and generate one solution for each one
@@ -159,7 +159,8 @@ public abstract class TDP_Part extends TDP_Anyk_Iterator
 		TDP_State_Node parent_node;
 		current = pref;
 		List<TDP_State_Node> node_list = pref.solutionToNodes_strict_order();
-    	while (current.length != instance.stages_no)
+		// Recall that stage 0 contains the starting node which is not encoded in the solutions
+    	while (current.length < instance.stages_no - 1)
     	{
 			next_stage = current.length + 1;
 			// Find the parent state for the next decision

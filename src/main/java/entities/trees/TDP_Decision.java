@@ -47,10 +47,9 @@ public class TDP_Decision implements Comparable<TDP_Decision>
      */
     public double opt_achievable_cost()
     {
-        return this.cost + this.target.get_subtree_opt_cost();
+        return this.cost + this.target.get_opt_cost();
     }
 
-    
     /** 
      * Two decisions from the same parent state are compared according to the minimum achievable cost 
      * starting from the parent and (as a first step) taking each decision.
@@ -63,8 +62,8 @@ public class TDP_Decision implements Comparable<TDP_Decision>
         // compareTo should return < 0 if this is supposed to be less than other, 
         // > 0 if this is supposed to be greater than other  
         // and 0 if they are supposed to be equal
-        double this_cost = this.cost + this.target.get_subtree_opt_cost();
-        double other_cost = other.cost + other.target.get_subtree_opt_cost();
+        double this_cost = this.cost + this.target.get_opt_cost();
+        double other_cost = other.cost + other.target.get_opt_cost();
         if (this_cost < other_cost) return -1;
         else if (this_cost > other_cost) return 1;
         else

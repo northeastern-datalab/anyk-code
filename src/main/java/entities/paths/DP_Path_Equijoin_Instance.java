@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import entities.Relation;
+import entities.State_Node;
 import entities.Tuple;
 import util.Common;
 
@@ -34,14 +35,12 @@ public class DP_Path_Equijoin_Instance extends DP_Problem_Instance
         this.path_query = query;
 
         DP_State_Node new_node, node_same_key;
-        Tuple right_tuple;
-        List<DP_State_Node> joining_nodes;
+        List<State_Node> joining_nodes;
         ArrayList<DP_State_Node> new_stage, prev_stage;
         Relation relation;
         int[] join_attributes_right, join_attributes_left;
         ArrayList<Double> join_values_left;
         int relation_index;
-        double cost;
 
         // The number of stages for an equi-join will be equal to the length of the path query
         int l = path_query.length;
@@ -72,9 +71,9 @@ public class DP_Path_Equijoin_Instance extends DP_Problem_Instance
             // are grouped by join attribute values
             // join_conditions contains pairs - the indexes of the right relation are the second value
             join_attributes_right = path_query.join_conditions.get(relation_index).getValue1();
-            // Each entry in the hashtable is a list of node
+            // Each entry in the hashtable is a list of nodes
             // whose associated tuples share the same join attribute values
-            HashMap<List<Double>, List<DP_State_Node>> right_hash = Common.hash_stage(prev_stage, join_attributes_right);
+            HashMap<List<Double>, List<State_Node>> right_hash = Common.hash_stage(prev_stage, join_attributes_right);
 
             // Now hash the nodes in the new (left) stage
             // join_conditions contains pairs - the indexes of the left relation are the first value
@@ -100,11 +99,10 @@ public class DP_Path_Equijoin_Instance extends DP_Problem_Instance
                     {
                         // If we can't find those values in the right hash table, throw away the tuple
                         // Else add an edge for each matching tuple
-                        for (DP_State_Node join_node : joining_nodes)
+                        for (State_Node join_node : joining_nodes)
                         {
                             // For each one of them add a decision to the new node
-                            cost = ((Tuple) join_node.state_info).cost;
-                            new_node.add_decision(join_node, cost);                                
+                            new_node.add_decision((DP_State_Node) join_node, join_node.toTuple().cost);                                
                         }                        
                     }
                 }
@@ -129,13 +127,26 @@ public class DP_Path_Equijoin_Instance extends DP_Problem_Instance
         for (DP_State_Node right_node : prev_stage)
         {
             if (right_node.get_number_of_children() > 0 || right_node.is_terminal())
-            {
-                right_tuple = ((Tuple) right_node.state_info); // cast so that we can lookup the cost
-                starting_node.add_decision(right_node, right_tuple.cost);
-            }
+                starting_node.add_decision(right_node, right_node.toTuple().cost);
         }
         ArrayList<DP_State_Node> starting_stage = new ArrayList<DP_State_Node>();
         starting_stage.add(starting_node);
+    }
+
+    /** 
+     * Constructs the top-1 solution of the DP problem.
+     */
+    public List<Tuple> get_best_solution()
+    {
+        List<Tuple> tups = new ArrayList<Tuple>();
+        DP_State_Node curr = this.starting_node.decisions.best_decision.target;
+        while (true)
+        {
+            tups.add((Tuple) curr.state_info);
+            if (curr.decisions.best_decision == null) break;
+            curr = curr.decisions.best_decision.target;
+        }
+        return tups;
     }
 
     public static void main(String args[]) 

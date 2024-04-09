@@ -13,14 +13,18 @@
 ###################
 **/sql_queries/*.sql
 
-# Graph input files #
+# Input files #
 ###################
-*.csv
-*.tsv
+Experiments/**/*.csv
+Experiments/**/*.tsv
+out.*
 
 # Database input files #
 ###################
 *.tbl
+
+# Json input files 
+Experiments/**/*.json
 
 # Compiled source #
 ###################
@@ -57,3 +61,5 @@ dependency-reduced-pom.xml
 org.eclipse.*
 launch.json
 settings.json
+*.DS_STORE
+

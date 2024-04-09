@@ -71,8 +71,8 @@ public class Tree_Batch extends TDP_Anyk_Iterator
         // Add the tuple associated with the node
         current_node_list.add(current_node);
 
-        // The recursion ends at the last stage (according to the stage indexing)
-        if (current_node.stage == instance.stages_no)
+        // The recursion ends at the last stage
+        if (current_node_list.size() == instance.stages_no - 1)
         {
             Tree_Query_Solution sol = new Tree_Query_Solution(current_node_list);
             this.all_solutions.add(sol);
@@ -82,7 +82,7 @@ public class Tree_Batch extends TDP_Anyk_Iterator
         {
             // Since this is TDP, the states of the next stage that we visit are determined by the corresponding
             // parent of the next stage
-            int next_stage = current_node.stage + 1;
+            int next_stage = current_node_list.size() + 1;
             int parent_stage = instance.get_parent_stage(next_stage);
             TDP_State_Node parent_node = current_node_list.get(parent_stage - 1);
             int branch_idx = instance.get_branch_index(next_stage);

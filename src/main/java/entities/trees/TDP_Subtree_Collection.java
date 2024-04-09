@@ -24,7 +24,7 @@ public class TDP_Subtree_Collection
     /** 
      * The total cost of the solutions in the collection.
     */
-    public Double cost;
+    public double cost;
     /** 
      * The number of solutions in the collection.
     */
@@ -80,7 +80,7 @@ public class TDP_Subtree_Collection
      */
     public List<TDP_Subtree_Solution> get_solutions()
     {
-        List<TDP_Subtree_Solution> res = new ArrayList<TDP_Subtree_Solution>();
+        List<TDP_Subtree_Solution> res = new ArrayList<TDP_Subtree_Solution>(this.size);
         TDP_Subtree_Collection current = this;
         // It could be that the collection is empty, i.e., even the last solution is null
         // In that case, return an empty list

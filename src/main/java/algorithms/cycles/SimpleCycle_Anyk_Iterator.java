@@ -14,6 +14,7 @@ import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Eager;
 import algorithms.paths.DP_Lazy;
 import algorithms.paths.DP_Quick;
+import algorithms.paths.DP_QuickPlus;
 import algorithms.paths.DP_Recursive;
 import algorithms.paths.DP_Take2;
 import algorithms.paths.Path_Batch;
@@ -503,6 +504,7 @@ public class SimpleCycle_Anyk_Iterator
         else if (anyk_alg.equals("Lazy")) iter = new DP_Lazy(instance, null);
         else if (anyk_alg.equals("Quick")) iter = new DP_Quick(instance, null);
         else if (anyk_alg.equals("Recursive")) iter = new DP_Recursive(instance, null);
+        else if (anyk_alg.equals("QuickMemoized")) iter = new DP_QuickPlus(instance, null);
         else if (anyk_alg.equals("BatchSorting")) iter = new Path_BatchSorting(instance, null);
         else
         {

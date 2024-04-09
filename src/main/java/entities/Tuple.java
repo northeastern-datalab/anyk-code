@@ -112,6 +112,15 @@ public class Tuple implements Comparable<Tuple>
     }
 
     /** 
+     * @return String A string representation of the values of the tuple 
+     * without its cost
+     */
+    public String flat_format_no_cost()
+    {
+        return Arrays.toString(values).replaceAll("\\[|\\]|,", "");
+    }
+
+    /** 
      * @return int
      */
     @Override
@@ -143,6 +152,7 @@ public class Tuple implements Comparable<Tuple>
     @Override
     public String toString()
     {
+        //return Double.toString(values[1]) + " ";
         return relation.relation_id + ":" + Arrays.toString(values); 
         // return Arrays.toString(values).replaceAll("\\[|\\]|,", "") + " " + cost;
     }

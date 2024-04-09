@@ -48,7 +48,7 @@ public class TDP_Prefix_Solution extends TDP_Solution implements Comparable<TDP_
         // Cost is the current cost of the decisions in the prefix
         this.cost = first_decision.cost;
         // Future cost is the cost we will get if we expand the prefix optimally
-        this.future_cost = this.cost + this.latest_decision.target.get_subtree_opt_cost();
+        this.future_cost = this.cost + this.latest_decision.target.get_opt_cost();
     }
 
     /** 
@@ -106,17 +106,14 @@ public class TDP_Prefix_Solution extends TDP_Solution implements Comparable<TDP_
         // If the length is > 1, then use the 2nd constructor to replace the last decision
         else 
         {
-            double future_cost = this.get_future_cost() 
+            double future_cost = this.get_final_cost() 
                             - this.latest_decision.opt_achievable_cost() 
                             + alt_decision.opt_achievable_cost();
             return new TDP_Prefix_Solution(this, alt_decision, future_cost);
         }
     }
     
-    /** 
-     * @return double The cost that this prefix will have when expanded optimally.
-     */
-    public double get_future_cost()
+    public double get_final_cost()
     {
         return this.future_cost;
     }
@@ -155,13 +152,16 @@ public class TDP_Prefix_Solution extends TDP_Solution implements Comparable<TDP_
      */
     public List<Tuple> solutionToTuples()
     {
-        List<Tuple> res = new ArrayList<Tuple>();
+        List<Tuple> res = new ArrayList<Tuple>(this.length);
         Tuple tuple;
         TDP_Prefix_Solution current = this;
         while (current != null)
         {
-            tuple = (Tuple) current.latest_decision.target.state_info;
-            res.add(tuple);
+            if (current.latest_decision.target.state_info instanceof Tuple)
+            {
+                tuple = (Tuple) current.latest_decision.target.state_info;
+                res.add(tuple);
+            }
             current = current.shorter_prefix;
         }
         return res;
@@ -170,16 +170,19 @@ public class TDP_Prefix_Solution extends TDP_Solution implements Comparable<TDP_
     public List<Tuple> solutionToTuples_strict_order()
     {
         // Uses a stack to reverse the order and return them in the correct order
-        List<Tuple> res = new ArrayList<Tuple>();
+        List<Tuple> res = new ArrayList<Tuple>(this.length);
         // Use a stack to gather tuples as we go backwards to avoid inserting in the front of the string
         // When all tuples are gathered, start appending to the end of the list
-        Deque<Tuple> stack = new ArrayDeque<Tuple>();
+        Deque<Tuple> stack = new ArrayDeque<Tuple>(this.length);
         Tuple tuple;
         TDP_Prefix_Solution current = this;
         while (current != null)
         {
-            tuple = (Tuple) current.latest_decision.target.state_info;
-            stack.addFirst(tuple);  // push tuple to the front of the stack
+            if (current.latest_decision.target.state_info instanceof Tuple)
+            {
+                tuple = (Tuple) current.latest_decision.target.state_info;
+                stack.addFirst(tuple);  // push tuple to the front of the stack
+            }
             current = current.shorter_prefix;
         }
         while (!stack.isEmpty()) 
@@ -197,7 +200,7 @@ public class TDP_Prefix_Solution extends TDP_Solution implements Comparable<TDP_
      */
     public List<TDP_State_Node> solutionToNodes_strict_order()
     {
-        List<TDP_State_Node> res = new ArrayList<TDP_State_Node>();
+        List<TDP_State_Node> res = new ArrayList<TDP_State_Node>(this.length);
         TDP_State_Node node;
         TDP_Prefix_Solution current = this;
         while (current != null)

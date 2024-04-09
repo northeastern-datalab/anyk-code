@@ -6,7 +6,7 @@ import java.util.List;
 import org.javatuples.Triplet;
 
 import entities.Join_Predicate;
-import entities.paths.DP_State_Node;
+import entities.State_Node;
 import util.Common;
 
 /** 
@@ -16,7 +16,7 @@ import util.Common;
 public class Band 
 {
     /** 
-     * Given two DP stages that correspond to the tuples of two relations 
+     * Given two (T-)DP stages that correspond to the tuples of two relations 
      * and a band condition, translates the band into multiple inequalities that give the same result.
      * The resulting inequalities cover different (and possibly overlapping) groups of left-right tuples.
      * These can then be handled independently.
@@ -26,16 +26,16 @@ public class Band
      * @param band A band join predicate between the two relations.
      * @return A list of (inequality, left', right') triples where the inequality predicate covers left'-right' tuples
      */
-    public static List<Triplet<Join_Predicate, List<DP_State_Node>, List<DP_State_Node>>> 
-        band_grouping(List<DP_State_Node> left, List<DP_State_Node> right, Join_Predicate band)
+    public static List<Triplet<Join_Predicate, List<? extends State_Node>, List<? extends State_Node>>> 
+        band_grouping(List<? extends State_Node> left, List<? extends State_Node> right, Join_Predicate band)
     {
         int left_group_start_idx, left_group_end_idx;
         double right_group_start_val, right_group_end_val;
-        List<Triplet<Join_Predicate, List<DP_State_Node>, List<DP_State_Node>>> res = 
-            new ArrayList<Triplet<Join_Predicate, List<DP_State_Node>, List<DP_State_Node>>>();
+        List<Triplet<Join_Predicate, List<? extends State_Node>, List<? extends State_Node>>> res = 
+            new ArrayList<Triplet<Join_Predicate, List<? extends State_Node>, List<? extends State_Node>>>();
 
         // Split the right one into groups based on epsilon-intervals
-        for (List<DP_State_Node> right_group : split_by_epsilon(right, band.attr_idx_2, band.parameter))
+        for (List<? extends State_Node> right_group : split_by_epsilon(right, band.attr_idx_2, band.parameter))
         {
             right_group_start_val = right_group.get(0).toTuple().values[band.attr_idx_2];
             right_group_end_val = right_group.get(right_group.size() - 1).toTuple().values[band.attr_idx_2];
@@ -45,8 +45,8 @@ public class Band
             left_group_end_idx = Common.binary_search_max(left, band.attr_idx_1, right_group_start_val + band.parameter, false);
             if (left_group_start_idx != -1 && left_group_end_idx != -1)
             {
-                List<DP_State_Node> left_group_greater = left.subList(left_group_start_idx, left_group_end_idx + 1);
-                res.add(new Triplet<Join_Predicate, List<DP_State_Node>, List<DP_State_Node>>
+                List<? extends State_Node> left_group_greater = left.subList(left_group_start_idx, left_group_end_idx + 1);
+                res.add(new Triplet<Join_Predicate, List<? extends State_Node>, List<? extends State_Node>>
                     (greater_than, left_group_greater, right_group));   
             }
             // Find the limits of the left group that will be handled with a less-than condition
@@ -55,8 +55,8 @@ public class Band
             left_group_end_idx = Common.binary_search_max(left, band.attr_idx_1, right_group_end_val + band.parameter, true);
             if (left_group_start_idx != -1 && left_group_end_idx != -1)
             {
-                List<DP_State_Node> left_group_less = left.subList(left_group_start_idx, left_group_end_idx + 1);   
-                res.add(new Triplet<Join_Predicate, List<DP_State_Node>, List<DP_State_Node>>
+                List<? extends State_Node> left_group_less = left.subList(left_group_start_idx, left_group_end_idx + 1);   
+                res.add(new Triplet<Join_Predicate, List<? extends State_Node>, List<? extends State_Node>>
                     (less_than, left_group_less, right_group));        
             }
         }            
@@ -78,11 +78,11 @@ public class Band
      * @param stage The (sorted) subset of a relation/stage.
      * @param attr_idx The index of the attribute we use for spliiting.
      * @param epsilon The epsilon parameter of a band predicate.
-     * @return List<List<DP_State_Node>> A partitioning of the nodes as a list of lists.
+     * @return List<List<State_Node>> A partitioning of the nodes as a list of lists.
      */
-    public static List<List<DP_State_Node>> split_by_epsilon(List<DP_State_Node> stage, int attr_idx, double epsilon)
+    public static List<List<? extends State_Node>> split_by_epsilon(List<? extends State_Node> stage, int attr_idx, double epsilon)
     {
-        List<List<DP_State_Node>> res = new ArrayList<List<DP_State_Node>>();
+        List<List<? extends State_Node>> res = new ArrayList<List<? extends State_Node>>();
         int current_idx = 0;
         double current_val = stage.get(0).toTuple().values[attr_idx];
         int group_start_idx = 0;
