@@ -1,4 +1,4 @@
-package query_parser;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,8 +28,14 @@ import entities.Tuple;
 import entities.trees.TDP_Solution;
 import entities.trees.TDP_Thetajoin_Instance;
 import entities.trees.Tree_ThetaJoin_Query;
+import query_parser.JsonOption;
+import query_parser.JsonOptionParser;
+import query_parser.JsonParserTree;
+import util.Common;
 import util.Measurements;
 import util.OpenCsvWriter;
+
+
 
 public class MainEntryPoint {
     public static String getName() {
@@ -81,7 +87,7 @@ public class MainEntryPoint {
 
         Option est_result_size_opt = new Option("ers", "estimated_result_size", true, "An estimate of how many answers there will be (needed for -tm)");
         timing_measurements_opt.setRequired(false);
-        options.addOption(timing_measurements_opt);
+        options.addOption(est_result_size_opt);
 
         Option factorization_method_opt = new Option("fm", "factorization_method", true, "factorization method to use for inequalities");
         factorization_method_opt.setRequired(false);
@@ -375,9 +381,8 @@ public class MainEntryPoint {
                     if (solution == null)
                         break;
                     if (result_file_path != null)
-                    {
-                        String result = solution.toString() + "|" + solution.get_cost();
-                        resultList.add(result);
+                    {                        
+                        resultList.add(Common.solution_to_output_string(solution));
                     }
                     if (timings_file_path != null)
                         measurements.add_k(solution.solutionToTuples());

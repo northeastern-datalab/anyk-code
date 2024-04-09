@@ -67,7 +67,7 @@ Other ranking functions are not currently supported, but certain ones (e.g., lex
 
 
 ## Running on your own Queries and Data
-See [examples/](/examples) for how to run any-k with your own queries and data.
+Use the `MainEntryPoint` class to run on your own queries and data. See [examples/](/examples) for some helpful examples.
 The query is specified as a join tree (in json format) where each joining relation can
 refer to the same input file (a self-join) or a different file.
 The execution can be parameterized by the following set of parameters,

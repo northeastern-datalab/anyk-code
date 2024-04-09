@@ -8,12 +8,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.javatuples.Pair;
 
 import entities.Join_Predicate;
 import entities.State_Node;
 import entities.Tuple;
+import entities.paths.DP_Solution;
+import entities.trees.TDP_Solution;
 
 /** 
  * This class contains static methods that are generally useful and may be used by multiple other classes.
@@ -21,6 +24,16 @@ import entities.Tuple;
 */
 public class Common
 {
+    public static String solution_to_output_string(DP_Solution solution)
+    {
+        return solution.solutionToTuples_strict_order().stream().map(i -> i.toString()).collect(Collectors.joining(";")) + "|" + solution.get_cost();
+    }
+
+    public static String solution_to_output_string(TDP_Solution solution)
+    {
+        return solution.solutionToTuples_strict_order().stream().map(i -> i.toString()).collect(Collectors.joining(";")) + "|" + solution.get_cost();
+    }
+
     public static boolean is_conjunction_of_simple_equalities(List<List<Join_Predicate>> join_condition)
     {
         // Check if it is 1 conjunction

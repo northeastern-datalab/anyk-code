@@ -1,9 +1,8 @@
 {
     "result_output_file": "res.out",
     "timings_output_file": "time.out",
-    "algorithm": "Recursive",
+    "algorithm": "Lazy",
     "max_k": 100,
     "weight_cutoff": null,
-    "timing_frequency": 2,
     "factorization_method": "binary_part"
 }
