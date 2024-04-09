@@ -9,4 +9,5 @@ entities.paths
 entities.trees
 experiments
 factorization
+query_parser
 util
