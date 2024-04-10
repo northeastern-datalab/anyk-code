@@ -24,6 +24,16 @@ import entities.trees.TDP_Solution;
 */
 public class Common
 {
+    public static String tuple_to_output_string(Tuple t)
+    {
+        return t.toString() + "|" + t.cost;
+    }
+
+    public static String tuple_list_to_output_string(List<Tuple> tuples, double cost)
+    {
+        return tuples.stream().map(i -> i.toString()).collect(Collectors.joining(";")) + "|" + cost;
+    }
+
     public static String solution_to_output_string(DP_Solution solution)
     {
         return solution.solutionToTuples_strict_order().stream().map(i -> i.toString()).collect(Collectors.joining(";")) + "|" + solution.get_cost();

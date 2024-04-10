@@ -56,7 +56,7 @@ public class Path_Equijoin
         if (algorithm.equals("Boolean"))
         {
             boolean res = query.boolean_query();
-            measurements.add_boolean(res);
+            measurements.add_single_output(res ? 1 : 0);
         }
         else if (algorithm.equals("Yannakakis"))
         {

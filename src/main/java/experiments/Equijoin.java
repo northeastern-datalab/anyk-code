@@ -84,7 +84,7 @@ public class Equijoin {
                 System.exit(1);
             }
             boolean res = path_query.boolean_query();
-            measurements.add_boolean(res);
+            measurements.add_single_output(res ? 1 : 0);
         } else if (algorithm.equals("Yannakakis")) {
             Yannakakis yann = null;
             if (query_type.equals("path")) {

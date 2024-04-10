@@ -1,0 +1,6 @@
+{
+    "algorithm": "Lazy",
+    "max_k": 10000,
+    "timing_frequency": 100,
+    "factorization_method": "binary_part"
+}

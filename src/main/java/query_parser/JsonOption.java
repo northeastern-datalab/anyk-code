@@ -12,23 +12,43 @@ public class JsonOption {
     private String factorization_method;
     private String path_optimization;
 
-    public String getResult_Output_File() { return result_output_file; }
+    public String getResult_Output_File() {
+        return result_output_file;
+    }
 
-    public String getTimings_Output_File() { return timings_output_file; }
+    public String getTimings_Output_File() {
+        return timings_output_file;
+    }
 
-    public String getAlgorithm() { return algorithm; }
+    public String getAlgorithm() {
+        return algorithm;
+    }
 
-    public Integer getMax_k() { return max_k; }
+    public Integer getMax_k() {
+        return max_k;
+    }
 
-    public Double getWeight_cutoff() { return weight_cutoff; }
+    public Double getWeight_cutoff() {
+        return weight_cutoff;
+    }
 
-    public Integer getTiming_frequency() { return timing_frequency; }
+    public Integer getTiming_frequency() {
+        return timing_frequency;
+    }
 
-    public Integer getTiming_measurements() { return timing_measurements; }
+    public Integer getTiming_measurements() {
+        return timing_measurements;
+    }
 
-    public Integer getEstimated_result_size() { return estimated_result_size; }
+    public Integer getEstimated_result_size() {
+        return estimated_result_size;
+    }
 
-    public String getFactorization_method() { return factorization_method; }
+    public String getFactorization_method() {
+        return factorization_method;
+    }
 
-    public String getPath_optimization() { return path_optimization; }
+    public String getPath_optimization() {
+        return path_optimization;
+    }
 }

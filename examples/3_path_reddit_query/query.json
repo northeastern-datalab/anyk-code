@@ -1,0 +1,86 @@
+{
+    "query": [
+        {
+            "relation_name": "R1",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "NegReadability",
+            "parent_name": "null",
+            "join_condition": [
+                [
+                    "null"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        },
+        {
+            "relation_name": "R2",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "NegReadability",
+            "parent_name": "R1",
+            "join_condition": [
+                [
+                    "R1.To = R2.From",
+                    "R1.Timestamp < R2.Timestamp",
+                    "R1.Sentiment > R2.Sentiment"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        },
+        {
+            "relation_name": "R3",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "NegReadability",
+            "parent_name": "R2",
+            "join_condition": [
+                [
+                    "R2.To = R3.From",
+                    "R2.Timestamp < R3.Timestamp",
+                    "R2.Sentiment > R3.Sentiment"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        },
+        {
+            "relation_name": "R4",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "NegReadability",
+            "parent_name": "R3",
+            "join_condition": [
+                [
+                    "R3.To = R4.From",
+                    "R3.Timestamp < R4.Timestamp",
+                    "R3.Sentiment > R4.Sentiment"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        }
+    ]
+}

@@ -77,7 +77,7 @@ provided in a different json file, or via the command line (has priority).
 
 - `timings_output_file`:  Path to file where timing information will be recorded. You can also leave it empty.
 
-- `algorithm`: Has to be one of "Eager", "All", "Take2", "Lazy", "Quick", "QuickPlus", "Recursive", "BatchSorting", "Batch", "Yannakakis", "YannakakisSorting", "Count", "Boolean".
+- `algorithm`: Has to be one of "Eager", "All", "Take2", "Lazy", "Quick", "QuickPlus", "Recursive", "BatchSorting", "Batch", "Yannakakis", "YannakakisSorting", "Count".
 
 - `max_k`: Maximum number of output tuples to be produced.
 

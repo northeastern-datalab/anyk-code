@@ -140,14 +140,14 @@ public class Measurements
     }
 
     /** 
-     * Records the result of a boolean query (true/false).
-     * @param result A boolean value.
+     * Records the result of queries with a single value (boolean or count).
+     * @param result An integer that depends on the query output (to make sure the execution it is not compiled away)
     */
-    public void add_boolean(boolean result)
+    public void add_single_output(int result)
     {
         // Add to the counter 0 if false
         // 1 if true
-        dummy_counter += result ? 1 : 0;
+        dummy_counter += result;
 
         if (k % sample_rate == 0 || k == 1 || k == max_k) 
         {

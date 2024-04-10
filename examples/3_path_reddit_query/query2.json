@@ -1,0 +1,80 @@
+{
+    "query": [
+        {
+            "relation_name": "R1",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "Sentiment",
+            "parent_name": "null",
+            "join_condition": [
+                [
+                    "null"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        },
+        {
+            "relation_name": "R2",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "Sentiment",
+            "parent_name": "R1",
+            "join_condition": [
+                [
+                    "R1.To = R2.From"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        },
+        {
+            "relation_name": "R3",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "Sentiment",
+            "parent_name": "R2",
+            "join_condition": [
+                [
+                    "R2.To = R3.From"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        },
+        {
+            "relation_name": "R4",
+            "relation_schema": [
+                "From",
+                "To",
+                "Timestamp",
+                "Sentiment",
+                "Length",
+                "NegReadability"
+            ],
+            "weight_column": "Sentiment",
+            "parent_name": "R3",
+            "join_condition": [
+                [
+                    "R3.To = R4.From"
+                ]
+            ],
+            "file_name": "reddit_sample.csv"
+        }
+    ]
+}
