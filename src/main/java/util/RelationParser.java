@@ -1,12 +1,12 @@
 package util;
 
-import entities.Relation;
-import entities.Tuple;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
+import entities.Relation;
+import entities.Tuple;
 
 /**
  * This class parses each input record to create a Relation
@@ -16,6 +16,11 @@ public class RelationParser {
 
     // relation from JsonParser
     Relation relation;
+
+    public RelationParser(Relation relation)
+    {
+        this.relation = relation;
+    }
 
     public RelationParser(Integer weight_attribute_index, Relation relation)
     {
@@ -87,7 +92,10 @@ public class RelationParser {
                     for (int i = 0; i < tuple_vals.length; i++) {
                         tuple_vals[i] =  Double.parseDouble(tokens[i]);
                     }
-                    tuple_cost = Double.parseDouble(tokens[weight_attribute_index]);
+                    if (this.weight_attribute_index == null)
+                        tuple_cost = 0.0;
+                    else
+                        tuple_cost = Double.parseDouble(tokens[weight_attribute_index]);
                     t = new Tuple(tuple_vals, tuple_cost, this.relation);
                     this.relation.insert(t);
                 }

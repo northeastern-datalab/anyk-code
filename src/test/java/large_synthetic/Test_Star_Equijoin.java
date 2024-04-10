@@ -18,6 +18,7 @@ import algorithms.trees.TDP_All;
 import algorithms.trees.TDP_Anyk_Iterator;
 import algorithms.trees.TDP_Eager;
 import algorithms.trees.TDP_Lazy;
+import algorithms.trees.TDP_Quick;
 import algorithms.trees.TDP_Recursive;
 import algorithms.trees.TDP_Take2;
 import algorithms.trees.Tree_BatchSorting;
@@ -48,7 +49,7 @@ class Test_Star_Equijoin
         TDP_Eager.class,
         TDP_Take2.class,
         TDP_Lazy.class,
-        //TDP_Quick.class
+        TDP_Quick.class
     };
 
     private static Stream<Arguments> provide_Test_Params_BinaryRandomDist() 

@@ -1,0 +1,6 @@
+{
+    "result_output_file": "res.out",
+    "timings_output_file": "time.out",
+    "algorithm": "UnrankedEnum",
+    "path_optimization": "true"
+}

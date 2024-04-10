@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
+import algorithms.Configuration;
 import entities.paths.DP_Decision;
 import entities.paths.DP_DecisionSet;
 import entities.paths.DP_Path_ThetaJoin_Instance;
@@ -19,20 +20,10 @@ import entities.paths.Path_ThetaJoin_Query;
  * returns the next DP solution in an arbitrary order.
  * Unranked enumeration is implemented as a Lawler procedure without any PQs,
  * thus yielding constant delay (if the number of stages is constant).
- * IMPORTANT: Before using this class, {@link entities.paths.DP_Problem_Instance#bottom_up}
- * must have already been run on the DP instance.
  * @author Nikolaos Tziavelis
 */
-public class DP_Solution_Iterator
+public class DP_Unranked_Iterator extends DP_Iterator
 {
-    /** 
-     * The DP problem to run any-k on.
-    */
-    public DP_Problem_Instance instance;
-    /** 
-     * An identifier for the object (the class provides a setter/getter for that).
-    */
-	public String name;
 	/** 
 	 * Maintains all the prefix solutions that are not yet expanded.
 	*/
@@ -47,7 +38,7 @@ public class DP_Solution_Iterator
 	 * The stage in which {@link #latest_solution} made a sidetrack (by going to a successor).
 	 * It is the same as the length of the prefix that we popped in the previous call of {@link #get_next},
 	 * that was then expanded to {@link #latest_solution}.
-	 * By convention, latest_sidetrack_stage of the top-1 solution is 1.
+	 * By convention, latest_sidetrack_stage of the first solution is 1.
 	*/	
 	protected int latest_sidetrack_stage;
 
@@ -61,18 +52,18 @@ public class DP_Solution_Iterator
     }
 
     // Initializes the iterator
-	public DP_Solution_Iterator(DP_Problem_Instance inst)
+	public DP_Unranked_Iterator(DP_Problem_Instance inst, Configuration conf)
     {
-    	this.instance = inst;
+    	super(inst, conf);
     	this.latest_solution = null;
 		this.latest_sidetrack_stage = -1;
     	// Initialize the global queue with an empty prefix (that contains only the starting node)
 		this.global_q = new ArrayDeque<DP_Prefix_Solution>();
-    	// The prefix we start with contains only the best decision to go from starting_node to stage 1
+    	// The prefix we start with contains only the first decision to go from starting_node to stage 1
     	// That way, we guarantee that in the second call we start taking successor solutions from stage 1
-    	if (!instance.starting_node.get_decisions().isEmpty())	// Corner case: if no path can reach the terminal node, leave the queue empty
+    	if (!this.instance.starting_node.get_decisions().isEmpty())	// Corner case: if no path can reach the terminal node, leave the queue empty
     	{
-	    	DP_Prefix_Solution starting_prefix = new DP_Prefix_Solution(instance.starting_node.get_decisions().get(0));
+	    	DP_Prefix_Solution starting_prefix = new DP_Prefix_Solution(this.instance.starting_node.get_decisions().get(0));
 	    	this.global_q.add(starting_prefix);    		
 		}
     }
@@ -124,7 +115,7 @@ public class DP_Solution_Iterator
     }
 
 	/** 
-	 * Expands the prefix solution into a full solution by following athe first possible decision at each node.
+	 * Expands the prefix solution into a full solution by following the first possible decision at each node.
 	 * The full solution reaches a terminal node.
 	 * @param pref A prefix solution to be expanded.
 	 * @return DP_Prefix_Solution A new object that is a full solution.
@@ -151,7 +142,7 @@ public class DP_Solution_Iterator
     {
         // Initialize the successor lists
         for (DP_Decision dec : decisions.list_of_decisions)
-        dec.successors = new ArrayList<DP_Decision>(1);
+        	dec.successors = new ArrayList<DP_Decision>(1);
 
         // For each node, we store a pointer to the next decision
         // The list of successors will contain only one element
@@ -183,7 +174,7 @@ public class DP_Solution_Iterator
         Path_ThetaJoin_Query example_query = new Path_ThetaJoin_Query(1);
         DP_Path_ThetaJoin_Instance instance = new DP_Path_ThetaJoin_Instance(example_query, null);
         DP_Solution solution;
-        DP_Solution_Iterator iter = new DP_Solution_Iterator(instance);
+        DP_Unranked_Iterator iter = new DP_Unranked_Iterator(instance, null);
         for (int k = 1; k <= 1000; k++)
         {
             solution = iter.get_next();

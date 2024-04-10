@@ -18,6 +18,7 @@ import algorithms.Configuration;
 import algorithms.Naive_For_Verification;
 import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Quick;
+import algorithms.paths.DP_QuickPlus;
 import algorithms.paths.DP_Recursive;
 import data.BinaryRandomPattern;
 import data.Database_Query_Generator;
@@ -65,7 +66,8 @@ class Test_Path_Disjunctions
     static Class<?>[] anyk_algs = new Class[] 
     {
         DP_Recursive.class,
-        DP_Quick.class
+        DP_Quick.class,
+        DP_QuickPlus.class
     };
 
     private static Stream<Arguments> provide_Test_Params_BinaryRandomDist() 
@@ -137,7 +139,7 @@ class Test_Path_Disjunctions
         List<DP_Solution> iter_results_filtered = new ArrayList<DP_Solution>(new LinkedHashSet<DP_Solution>(iter_results));
         List<List<Tuple>> iter_results_as_tuples = new ArrayList<List<Tuple>>();
         for (DP_Solution sol : iter_results_filtered) iter_results_as_tuples.add(sol.solutionToTuples_strict_order());
-
+        
         assertEquals(true_result.size(), iter_results_as_tuples.size(), 
             "Incorrect size of result for " + q_id + " with " + anyk_alg.getName() + " n=" + rel_size + ", l=" + rel_num + ", d=" + domain_size);
         assertEquals(true_result, iter_results_as_tuples, 

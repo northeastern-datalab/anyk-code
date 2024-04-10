@@ -20,8 +20,8 @@ import algorithms.paths.DP_Lazy;
 import algorithms.paths.DP_Quick;
 import algorithms.paths.DP_QuickPlus;
 import algorithms.paths.DP_Recursive;
-import algorithms.paths.DP_Solution_Iterator;
 import algorithms.paths.DP_Take2;
+import algorithms.paths.DP_Unranked_Iterator;
 import algorithms.paths.Path_Batch;
 import algorithms.paths.Path_BatchSorting;
 import data.BinaryRandomPattern;
@@ -83,7 +83,7 @@ public class Path_Equijoin
         else if (algorithm.equals("UnrankedEnum"))
         {
             DP_Path_Equijoin_Instance instance = new DP_Path_Equijoin_Instance(query);
-            DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
+            DP_Unranked_Iterator iter_unranked = new DP_Unranked_Iterator(instance, null);
             DP_Solution solution;
             for (int k = 1; k <= max_k; k++)
             {

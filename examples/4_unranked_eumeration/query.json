@@ -1,0 +1,21 @@
+{
+    "query":
+    [
+      {
+        "relation_name": "R",
+        "relation_schema": ["A", "B"],
+        "parent_name": "null",
+        "join_condition": [["null"]],
+        "file_name": "./relation_1.csv"
+      },
+  
+      {
+        "relation_name": "S",
+        "relation_schema": ["B", "C"],
+        "parent_name": "R",
+        "join_condition": [["R.B = S.B"]],
+        "file_name": "./relation_2.csv"
+      }
+    ]
+  }
+  

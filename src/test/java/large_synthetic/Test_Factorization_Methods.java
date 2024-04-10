@@ -136,8 +136,8 @@ class Test_Factorization_Methods
         for (DP_Solution sol : iter_results) iter_results_as_tuples.add(sol.solutionToTuples_strict_order());
 
         assertEquals(true_result.size(), iter_results_as_tuples.size(), 
-            "Incorrect size of result for " + q_id + " with " + anyk_alg.getName() + " n=" + rel_size + ", l=" + rel_num + ", d=" + domain_size);
+            "Incorrect size of result for " + q_id + " with " + fact_method + " and " + anyk_alg.getName() + " n=" + rel_size + ", l=" + rel_num + ", d=" + domain_size);
         assertEquals(true_result, iter_results_as_tuples, 
-            "Results not the same as naive for " + q_id + " with " + anyk_alg.getName() + " n=" + rel_size + ", l=" + rel_num + ", d=" + domain_size);
+            "Results not the same as naive for " + q_id + " with " + fact_method + " and " + anyk_alg.getName() + " n=" + rel_size + ", l=" + rel_num + ", d=" + domain_size);
     }
 }

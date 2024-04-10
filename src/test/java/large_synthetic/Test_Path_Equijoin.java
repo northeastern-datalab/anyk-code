@@ -15,12 +15,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import algorithms.Configuration;
 import algorithms.Naive_For_Verification;
 import algorithms.paths.DP_All;
-import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Eager;
+import algorithms.paths.DP_Iterator;
 import algorithms.paths.DP_Lazy;
 import algorithms.paths.DP_Quick;
+import algorithms.paths.DP_QuickPlus;
 import algorithms.paths.DP_Recursive;
 import algorithms.paths.DP_Take2;
+import algorithms.paths.DP_Unranked_Iterator;
 import algorithms.paths.Path_BatchHeap;
 import algorithms.paths.Path_BatchSorting;
 import data.BinaryRandomPattern;
@@ -38,12 +40,13 @@ class Test_Path_Equijoin
     // rel_size, rel_num, domain_size
     static String[] input_properties = new String[] 
     { 
-        "50, 4, 50", 
-        "50, 4, 300", 
-        "20, 4, 8"
+        "100, 4, 100", 
+        "100, 4, 600", 
+        "20, 4, 5"
     };
     static Class<?>[] anyk_algs = new Class[] 
     {
+        DP_Unranked_Iterator.class,
         DP_Recursive.class,
         Path_BatchSorting.class,
         Path_BatchHeap.class,
@@ -51,7 +54,8 @@ class Test_Path_Equijoin
         DP_Eager.class,
         DP_Take2.class,
         DP_Lazy.class,
-        DP_Quick.class
+        DP_Quick.class,
+        DP_QuickPlus.class
     };
 
     private static Stream<Arguments> provide_Test_Params_BinaryRandomDist() 
@@ -102,10 +106,11 @@ class Test_Path_Equijoin
     {
         // Run the any-k algorithm
         DP_Problem_Instance inst = new DP_Path_Equijoin_Instance(q);
-        inst.bottom_up();
-        DP_Anyk_Iterator iter = null;
+        if (!anyk_alg.equals(DP_Unranked_Iterator.class))
+            inst.bottom_up();
+        DP_Iterator iter = null;
         try{
-            iter = (DP_Anyk_Iterator) anyk_alg.getDeclaredConstructor(DP_Problem_Instance.class, Configuration.class).newInstance(inst, null);
+            iter = (DP_Iterator) anyk_alg.getDeclaredConstructor(DP_Problem_Instance.class, Configuration.class).newInstance(inst, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -117,6 +122,18 @@ class Test_Path_Equijoin
             if (sol != null) iter_results.add(sol);
             else break;
         }
+        if (anyk_alg.equals(DP_Unranked_Iterator.class))
+        {
+            // Test if the output is the same by sorting it
+            Collections.sort(iter_results, new Comparator<DP_Solution>() {
+                @Override
+                public int compare(DP_Solution sol1, DP_Solution sol2) 
+                { 
+                    return sol1.compareAgainst(sol2);
+                }
+                });
+        }
+
         List<List<Tuple>> iter_results_as_tuples = new ArrayList<List<Tuple>>();
         for (DP_Solution sol : iter_results) iter_results_as_tuples.add(sol.solutionToTuples_strict_order());
 

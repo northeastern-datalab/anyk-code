@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import algorithms.Configuration;
-import algorithms.paths.DP_Solution_Iterator;
+import algorithms.paths.DP_Unranked_Iterator;
 import entities.Join_Predicate;
 import entities.Relation;
 import entities.paths.DP_Path_ThetaJoin_Instance;
@@ -70,7 +70,7 @@ public class Binary_Join_Unranked
         measurements = new Measurements(sample_rate, max_k);
         // Run unranked enumeration on the theta-join query
         DP_Problem_Instance instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-        DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
+        DP_Unranked_Iterator iter_unranked = new DP_Unranked_Iterator(instance, null);
         DP_Solution solution;
         for (int k = 1; k <= max_k; k++)
         {

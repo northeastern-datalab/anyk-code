@@ -18,8 +18,8 @@ import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Eager;
 import algorithms.paths.DP_Lazy;
 import algorithms.paths.DP_Recursive;
-import algorithms.paths.DP_Solution_Iterator;
 import algorithms.paths.DP_Take2;
+import algorithms.paths.DP_Unranked_Iterator;
 import algorithms.paths.Path_Batch;
 import algorithms.paths.Path_BatchHeap;
 import algorithms.paths.Path_BatchSorting;
@@ -343,7 +343,7 @@ public class Path_Inequalities
                 measurements = new Measurements(sample_rate, max_k);
                 // Run unranked enumeration on the theta-join query
                 instance = new DP_Path_ThetaJoin_Instance(query, factorization_method);
-                DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
+                DP_Unranked_Iterator iter_unranked = new DP_Unranked_Iterator(instance, null);
                 DP_Solution solution;
                 for (int k = 1; k <= max_k; k++)
                 {

@@ -14,42 +14,12 @@ import entities.paths.DP_Solution;
  * must have already been run on the DP instance.
  * @author Nikolaos Tziavelis
 */
-public abstract class DP_Anyk_Iterator
+public abstract class DP_Anyk_Iterator extends DP_Iterator
 {
-    /** 
-     * The DP problem to run any-k on.
-    */
-    public DP_Problem_Instance instance;
-    /** 
-     * An object that contains various configuration parameters for the algorithm.
-    */
-    public Configuration conf;
-    /** 
-     * An identifier for the object (the class provides a setter/getter for that).
-    */
-	public String name;
-
-    /** 
-     * @return String
-     */
-    public String get_name()
-	{
-		return this.name;
-	}
-
-    /** 
-     * @param name
-     */
-    public void set_name(String name)
-	{
-		this.name = name;
-	}
-
     // Initializes the iterator
 	public DP_Anyk_Iterator(DP_Problem_Instance inst, Configuration conf)
     {
-    	this.instance = inst;
-        this.conf = conf;
+    	super(inst, conf);
     }
 
 	/** 
@@ -58,13 +28,4 @@ public abstract class DP_Anyk_Iterator
 	 * @return DP_Solution The next best DP solution or null if there are no other solutions.
 	 */
     public abstract DP_Solution get_next();
-
-    /** 
-     * @return String The name of this class (used for help messages)
-     */
-    public static String getName()
-    {
-        String className = Thread.currentThread().getStackTrace()[2].getClassName(); 
-        return className;
-    }
 }

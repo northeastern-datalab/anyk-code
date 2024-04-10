@@ -56,6 +56,22 @@ public abstract class TDP_Solution// implements Bulk_Comparable
     public abstract double get_final_cost();
 
     /** 
+     * Two solutions are compared according to their cost.
+     * This method is needed for inserting the solutions into a PQ.
+     * @param other
+     * @return int
+     */
+    public int compareAgainst(TDP_Solution other)
+    {
+        // compareTo should return < 0 if this is supposed to be less than other, 
+        // > 0 if this is supposed to be greater than other  
+        // and 0 if they are supposed to be equal
+    	if (this.cost < other.cost) return -1;
+    	else if (this.cost > other.cost) return 1;
+    	else return 0;
+    }
+
+    /** 
      * @return String
      */
     @Override

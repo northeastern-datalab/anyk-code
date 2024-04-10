@@ -290,8 +290,17 @@ public class JsonParserTree {
             JsonQuery ele = relationName_to_element.get(entry.getKey());
             // retrieve weight column index
             String weight_column = ele.getWeight_column();
-            int weight_index = List.of(ele.getRelation_schema()).indexOf(weight_column);
-            RelationParser rParser = new RelationParser(weight_index, entry.getValue());
+            RelationParser rParser = null;
+            if (weight_column == null)
+            {
+                rParser = new RelationParser(entry.getValue());
+            }
+            else
+            {
+                int weight_index = List.of(ele.getRelation_schema()).indexOf(weight_column);
+                rParser = new RelationParser(weight_index, entry.getValue());
+            }
+
             // populate relation with tuples from input files using relation parser
             rParser.parse_file(ele.getFile_name());
         }

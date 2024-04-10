@@ -15,23 +15,25 @@ import algorithms.Configuration;
 import algorithms.Yannakakis;
 import algorithms.YannakakisSorting;
 import algorithms.paths.DP_All;
-import algorithms.paths.DP_Anyk_Iterator;
 import algorithms.paths.DP_Eager;
+import algorithms.paths.DP_Iterator;
 import algorithms.paths.DP_Lazy;
 import algorithms.paths.DP_Quick;
 import algorithms.paths.DP_QuickPlus;
 import algorithms.paths.DP_Recursive;
 import algorithms.paths.DP_Take2;
+import algorithms.paths.DP_Unranked_Iterator;
 import algorithms.paths.Path_Batch;
 import algorithms.paths.Path_BatchSorting;
 import algorithms.trees.TDP_All;
-import algorithms.trees.TDP_Anyk_Iterator;
 import algorithms.trees.TDP_Eager;
+import algorithms.trees.TDP_Iterator;
 import algorithms.trees.TDP_Lazy;
 import algorithms.trees.TDP_Quick;
 import algorithms.trees.TDP_QuickPlus;
 import algorithms.trees.TDP_Recursive;
 import algorithms.trees.TDP_Take2;
+import algorithms.trees.TDP_Unranked_Iterator;
 import algorithms.trees.Tree_Batch;
 import algorithms.trees.Tree_BatchSorting;
 import entities.Tuple;
@@ -292,28 +294,11 @@ public class MainEntryPoint {
             }
         }
 
-        else if (algorithm.equals("UnrankedEnum")) {
-            if (!path_optimization) {
-                System.err.println("Algorithm not currently supported");
-                System.exit(1);
-            }
-            // DP_Path_Equijoin_Instance instance = new
-            // DP_Path_Equijoin_Instance(path_query);
-            // DP_Solution_Iterator iter_unranked = new DP_Solution_Iterator(instance);
-            // DP_Solution solution;
-            // for (int k = 1; k <= max_k; k++) {
-            // solution = iter_unranked.get_next();
-            // if (solution == null)
-            // break;
-            // else
-            // measurements.add_k(solution.solutionToTuples());
-            // }
-        }
-
         else {
             if (path_optimization) {
                 DP_Path_ThetaJoin_Instance instance = new DP_Path_ThetaJoin_Instance(path_query, factorization_method);
-                instance.bottom_up();
+                if (!algorithm.equals("UnrankedEnum"))
+                    instance.bottom_up();
 
                 // // Return the first result in a uniform way (DP) for all algorithms
                 // int k = 1;
@@ -322,7 +307,7 @@ public class MainEntryPoint {
                 // k += 1;
                 // }
 
-                DP_Anyk_Iterator iter = null;
+                DP_Iterator iter = null;
                 // Run any-k
                 if (algorithm.equals("Eager"))
                     iter = new DP_Eager(instance, conf);
@@ -342,6 +327,8 @@ public class MainEntryPoint {
                     iter = new Path_BatchSorting(instance, conf);
                 else if (algorithm.equals("Batch"))
                     iter = new Path_Batch(instance, conf);
+                else if (algorithm.equals("UnrankedEnum"))
+                    iter = new DP_Unranked_Iterator(instance, conf);
                 else {
                     System.err.println("Algorithm not recognized.");
                     System.exit(1);
@@ -362,7 +349,8 @@ public class MainEntryPoint {
                 }
             } else {
                 TDP_Thetajoin_Instance instance = new TDP_Thetajoin_Instance(tree_query, factorization_method);
-                instance.bottom_up();
+                if (!algorithm.equals("UnrankedEnum"))
+                    instance.bottom_up();
 
                 // Return the first result in a uniform way (DP) for all algorithms
                 // int k = 1;
@@ -373,7 +361,7 @@ public class MainEntryPoint {
                 // k += 1;
                 // }
 
-                TDP_Anyk_Iterator iter = null;
+                TDP_Iterator iter = null;
                 // Run any-k
                 if (algorithm.equals("Eager"))
                     iter = new TDP_Eager(instance, conf);
@@ -393,6 +381,8 @@ public class MainEntryPoint {
                     iter = new Tree_BatchSorting(instance, conf);
                 else if (algorithm.equals("Batch"))
                     iter = new Tree_Batch(instance, conf);
+                else if (algorithm.equals("UnrankedEnum"))
+                    iter = new TDP_Unranked_Iterator(instance, conf);
                 else {
                     System.err.println("Algorithm not recognized.");
                     System.exit(1);
